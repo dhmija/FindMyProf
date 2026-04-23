@@ -1,20 +1,25 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator, Linking } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { doc, onSnapshot } from 'firebase/firestore';
+import { doc, onSnapshot, collection, query, where } from 'firebase/firestore';
 import { firestore } from '../../../services/firebase';
 import StatusBadge from '../../../components/StatusBadge';
 import { useAuth } from '../../../context/AuthContext';
 import { sendQuickNotify } from '../../../services/chatService';
+import { requestBooking } from '../../../services/bookingService';
+import { useProfile } from '../../../context/UserContext';
 
 export default function DirectoryDetail() {
   const { id } = useLocalSearchParams();
-  const { user } = useAuth();
+  const { user, role } = useAuth();
+  const { profile } = useProfile();
   const router = useRouter();
   
   const [faculty, setFaculty] = useState(null);
   const [loading, setLoading] = useState(true);
   const [notifyLoading, setNotifyLoading] = useState(false);
+  const [bookedSlots, setBookedSlots] = useState([]);
+  const [bookingLoading, setBookingLoading] = useState(null); // id of slot
 
   useEffect(() => {
     if (!id) return;
@@ -23,7 +28,7 @@ export default function DirectoryDetail() {
     const docRef = doc(firestore, 'faculties', id);
     
     // Set up real-time listener for live status updates
-    const unsubscribe = onSnapshot(docRef, (docSnap) => {
+    const unsubscribeProfile = onSnapshot(docRef, (docSnap) => {
       if (docSnap.exists()) {
         setFaculty({ id: docSnap.id, ...docSnap.data() });
       } else {
@@ -35,8 +40,19 @@ export default function DirectoryDetail() {
       setLoading(false);
     });
 
-    // Cleanup on unmount
-    return () => unsubscribe();
+    // Real-time listener for booked slots
+    const bookingsRef = collection(firestore, 'bookings');
+    const q = query(bookingsRef, where('facultyId', '==', id), where('status', 'in', ['pending', 'confirmed']));
+    
+    const unsubscribeBookings = onSnapshot(q, (snapshot) => {
+       const activeBookings = snapshot.docs.map(d => d.data().slot);
+       setBookedSlots(activeBookings);
+    });
+
+    return () => {
+      unsubscribeProfile();
+      unsubscribeBookings();
+    };
   }, [id]);
 
   const handleEmail = () => {
@@ -49,7 +65,8 @@ export default function DirectoryDetail() {
     setNotifyLoading(true);
     try {
       if (user?.uid && faculty?.id) {
-         await sendQuickNotify(faculty.id, user.uid);
+         let studentName = role === 'student' ? (profile?.fullName || profile?.name) : 'Student';
+         await sendQuickNotify(faculty.id, user.uid, faculty.name, studentName);
          alert("Teacher notified!");
       }
     } catch(e) {
@@ -58,9 +75,26 @@ export default function DirectoryDetail() {
       setNotifyLoading(false);
     }
   };
+  
+  const handleBookSlot = async (slotString) => {
+    if (!user || role !== 'student') {
+        alert("Only students can book office hours.");
+        return;
+    }
+    
+    setBookingLoading(slotString);
+    try {
+        let studentName = profile?.fullName || profile?.name || 'Unknown Student';
+        await requestBooking(faculty.id, faculty.name, user.uid, studentName, slotString);
+        alert("Booking requested! Faculty will confirm shortly.");
+    } catch(e) {
+        alert("Failed to book slot.");
+    } finally {
+        setBookingLoading(null);
+    }
+  };
 
   const navigateToChat = () => {
-    // Navigating without query params per standard structure (assuming global state tracking or router params implementation later)
     router.push(`/messages/index`); 
   };
 
@@ -156,13 +190,31 @@ export default function DirectoryDetail() {
 
           {/* Office Hours */}
           <View style={styles.card}>
-            <Text style={styles.cardTitle}>Office Hours</Text>
+            <Text style={styles.cardTitle}>Office Hours Bookings</Text>
             {faculty.officeHours && faculty.officeHours.length > 0 ? (
-              faculty.officeHours.map((slot, index) => (
-                <View key={index} style={styles.slotRow}>
-                   <Text style={styles.slotText}>• {slot}</Text>
-                </View>
-              ))
+              faculty.officeHours.map((slot, index) => {
+                const isBooked = bookedSlots.includes(slot);
+                const isLoading = bookingLoading === slot;
+                
+                return (
+                  <View key={index} style={styles.slotRow}>
+                    <Text style={[styles.slotText, isBooked && styles.slotTextMuted]}>• {slot}</Text>
+                    {isBooked ? (
+                      <View style={styles.bookedBadge}>
+                         <Text style={styles.bookedText}>Unavailable</Text>
+                      </View>
+                    ) : (role === 'student' && (
+                      <TouchableOpacity 
+                        style={styles.bookButton} 
+                        disabled={isLoading} 
+                        onPress={() => handleBookSlot(slot)}
+                      >
+                        {isLoading ? <ActivityIndicator color="#1E90FF" size="small" /> : <Text style={styles.bookText}>Book Slot</Text>}
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                );
+              })
             ) : (
               <Text style={styles.mutedText}>No office hours posted.</Text>
             )}
@@ -326,11 +378,46 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   slotRow: {
-    marginBottom: 6,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F5F5F5',
   },
   slotText: {
     fontSize: 14,
-    color: '#444',
+    color: '#333',
+    flex: 1,
+    paddingRight: 10,
+  },
+  slotTextMuted: {
+    color: '#999',
+    textDecorationLine: 'line-through',
+  },
+  bookButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    backgroundColor: '#E3F2FD',
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#BBDEFB',
+  },
+  bookText: {
+    color: '#1565C0',
+    fontWeight: '600',
+    fontSize: 13,
+  },
+  bookedBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    backgroundColor: '#F5F5F5',
+    borderRadius: 6,
+  },
+  bookedText: {
+    fontSize: 12,
+    color: '#999',
+    fontWeight: 'bold',
   },
   mutedText: {
     color: '#999',
