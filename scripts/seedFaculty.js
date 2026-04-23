@@ -1,0 +1,193 @@
+// Note: If running this with standard Node.js without "type": "module" in package.json, 
+// you may need to use `node --experimental-modules scripts/seedFaculty.js` or change 
+// the extension to .mjs. Alternatively, use tools like `npx esno scripts/seedFaculty.js`.
+
+import { initializeApp } from "firebase/app";
+import { getFirestore, collection, setDoc, doc } from "firebase/firestore";
+
+// PLACEHOLDER CONFIG - Match this to your services/firebase.js credentials
+const firebaseConfig = {
+  apiKey: "PLACEHOLDER_API_KEY",
+  authDomain: "PLACEHOLDER_AUTH_DOMAIN",
+  projectId: "PLACEHOLDER_PROJECT_ID",
+  storageBucket: "PLACEHOLDER_STORAGE_BUCKET",
+  messagingSenderId: "PLACEHOLDER_MESSAGING_SENDER_ID",
+  appId: "PLACEHOLDER_APP_ID"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const facultiesData = [
+  // Floor 1
+  {
+    name: "Dr. Alice Sharma",
+    department: "Computer Science",
+    block: "M",
+    floor: 1,
+    cubicle: "M-101A",
+    email: "alice.sharma@placeholder.edu",
+    subjects: ["Data Structures", "Algorithms"],
+    phone: "+91-9876543210",
+    isRegistered: false,
+    status: "unknown",
+    acceptsMessages: false,
+    officeHours: ["Monday 10:00 AM - 12:00 PM"],
+    substitutionNotice: null,
+    photoURL: null
+  },
+  {
+    name: "Prof. Bob Singh",
+    department: "Information Technology",
+    block: "M",
+    floor: 1,
+    cubicle: "M-102B",
+    email: "bob.singh@placeholder.edu",
+    subjects: ["Web Development", "Computer Networks"],
+    phone: null,
+    isRegistered: false,
+    status: "unknown",
+    acceptsMessages: false,
+    officeHours: ["Wednesday 2:00 PM - 4:00 PM"],
+    substitutionNotice: null,
+    photoURL: null
+  },
+  {
+    name: "Dr. Catherine Dias",
+    department: "Electronics",
+    block: "M",
+    floor: 1,
+    cubicle: "M-105C",
+    email: "catherine.dias@placeholder.edu",
+    subjects: ["Digital Logic", "Microprocessors"],
+    phone: null,
+    isRegistered: false,
+    status: "unknown",
+    acceptsMessages: false,
+    officeHours: [],
+    substitutionNotice: null,
+    photoURL: null
+  },
+  
+  // Floor 2
+  {
+    name: "Dr. David Kumar",
+    department: "Mechanical Engineering",
+    block: "M",
+    floor: 2,
+    cubicle: "M-201A",
+    email: "david.kumar@placeholder.edu",
+    subjects: ["Thermodynamics", "Fluid Mechanics"],
+    phone: null,
+    isRegistered: false,
+    status: "unknown",
+    acceptsMessages: false,
+    officeHours: ["Tuesday 11:00 AM - 1:00 PM"],
+    substitutionNotice: null,
+    photoURL: null
+  },
+  {
+    name: "Prof. Eve Fernandez",
+    department: "Computer Science",
+    block: "M",
+    floor: 2,
+    cubicle: "M-204D",
+    email: "eve.fernandez@placeholder.edu",
+    subjects: ["Machine Learning", "Artificial Intelligence"],
+    phone: "+91-1234567890",
+    isRegistered: true,
+    status: "available",
+    acceptsMessages: true,
+    officeHours: ["Thursday 1:00 PM - 3:00 PM"],
+    substitutionNotice: null,
+    photoURL: null
+  },
+  {
+    name: "Dr. Frank Iyer",
+    department: "Civil Engineering",
+    block: "M",
+    floor: 2,
+    cubicle: "M-206B",
+    email: "frank.iyer@placeholder.edu",
+    subjects: ["Structural Analysis", "Surveying"],
+    phone: null,
+    isRegistered: false,
+    status: "unknown",
+    acceptsMessages: false,
+    officeHours: [],
+    substitutionNotice: null,
+    photoURL: null
+  },
+
+  // Floor 3
+  {
+    name: "Prof. Grace Patel",
+    department: "Mathematics",
+    block: "M",
+    floor: 3,
+    cubicle: "M-301C",
+    email: "grace.patel@placeholder.edu",
+    subjects: ["Linear Algebra", "Calculus"],
+    phone: null,
+    isRegistered: false,
+    status: "unknown",
+    acceptsMessages: false,
+    officeHours: ["Friday 9:00 AM - 11:00 PM"],
+    substitutionNotice: null,
+    photoURL: null
+  },
+  {
+    name: "Dr. Henry Khan",
+    department: "Physics",
+    block: "M",
+    floor: 3,
+    cubicle: "M-303A",
+    email: "henry.khan@placeholder.edu",
+    subjects: ["Quantum Mechanics", "Electromagnetism"],
+    phone: null,
+    isRegistered: false,
+    status: "unknown",
+    acceptsMessages: false,
+    officeHours: [],
+    substitutionNotice: null,
+    photoURL: null
+  },
+  {
+    name: "Dr. Isabella Reddy",
+    department: "Computer Science",
+    block: "M",
+    floor: 3,
+    cubicle: "M-307B",
+    email: "isabella.reddy@placeholder.edu",
+    subjects: ["Cloud Computing", "Cybersecurity"],
+    phone: "+91-9871236540",
+    isRegistered: false,
+    status: "unknown",
+    acceptsMessages: false,
+    officeHours: ["Monday 3:00 PM - 5:00 PM"],
+    substitutionNotice: "On leave until next week.",
+    photoURL: null
+  }
+];
+
+async function seedDatabase() {
+  console.log("Starting faculty data seeding...");
+  
+  try {
+    for (const faculty of facultiesData) {
+      // Using email as an easy unique identifier, or let Firestore auto-generate IDs.
+      // We'll use random auto-generated IDs here to keep things simple.
+      const facultyRef = doc(collection(db, "faculties")); 
+      await setDoc(facultyRef, faculty);
+      console.log(`Successfully added: ${faculty.name} (Floor ${faculty.floor})`);
+    }
+    
+    console.log("Database seeding completed successfully!");
+    process.exit(0);
+  } catch (error) {
+    console.error("Error seeding database:", error);
+    process.exit(1);
+  }
+}
+
+seedDatabase();
