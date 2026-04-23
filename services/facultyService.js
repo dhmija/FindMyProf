@@ -1,5 +1,5 @@
 import { firestore } from './firebase';
-import { collection, getDocs, doc, updateDoc, query, where } from 'firebase/firestore';
+import { collection, getDocs, doc, updateDoc, query, where, setDoc, deleteDoc } from 'firebase/firestore';
 
 const FACULTY_COLLECTION = 'faculties';
 
@@ -43,13 +43,22 @@ export const updateFacultyProfile = async (id, data) => {
 
 export const claimFacultyProfile = async (email, uid) => {
   try {
-    // Basic logic to link the existing faculty document to the registered UID
-    const faculty = await getFacultyByEmail(email);
-    if (faculty) {
-      await updateFacultyProfile(faculty.id, { 
+    const facultyRef = collection(firestore, FACULTY_COLLECTION);
+    const q = query(facultyRef, where("email", "==", email));
+    const snapshot = await getDocs(q);
+    
+    if (!snapshot.empty) {
+      const seededDoc = snapshot.docs[0];
+      const seededData = seededDoc.data();
+      
+      await setDoc(doc(firestore, FACULTY_COLLECTION, uid), { 
+        ...seededData,
         claimedByUid: uid, 
-        claimedAt: new Date().toISOString() 
+        claimedAt: new Date().toISOString(),
+        isRegistered: true
       });
+      
+      await deleteDoc(doc(firestore, FACULTY_COLLECTION, seededDoc.id));
       return true;
     }
     return false;

@@ -36,8 +36,10 @@ export default function MessagesIndex() {
     const q = query(
       chatsRef, 
       where('participants', 'array-contains', user.uid),
-      orderBy('lastMessageTimestamp', 'desc') // Requires composite index potentially
+      orderBy('lastMessageTimestamp', 'desc') 
     );
+
+    let fallbackUnsubscribe = null;
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const liveThreads = snapshot.docs.map(doc => ({
@@ -47,10 +49,9 @@ export default function MessagesIndex() {
       setThreads(liveThreads);
       setLoading(false);
     }, (error) => {
-      // Incase index is missing, fallback listener
       console.error(error);
       const fallbackQ = query(chatsRef, where('participants', 'array-contains', user.uid));
-      onSnapshot(fallbackQ, (fallbackSnap) => {
+      fallbackUnsubscribe = onSnapshot(fallbackQ, (fallbackSnap) => {
           const fbThreads = fallbackSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
           fbThreads.sort((a,b) => (b.lastMessageTimestamp?.toMillis() || 0) - (a.lastMessageTimestamp?.toMillis() || 0));
           setThreads(fbThreads);
@@ -58,7 +59,12 @@ export default function MessagesIndex() {
       });
     });
 
-    return () => unsubscribe();
+    return () => {
+      unsubscribe();
+      if (fallbackUnsubscribe) {
+         fallbackUnsubscribe();
+      }
+    };
   }, [user]);
 
   const handlePress = useCallback((chatId, facultyId, studentId, displayName) => {

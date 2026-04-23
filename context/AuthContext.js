@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../services/firebase';
 import { signIn, signUp, signOut as authServiceSignOut } from '../services/authService';
@@ -14,21 +14,35 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const checkPersistedRole = async () => {
+    const checkPersistedData = async () => {
       try {
-        const storedRole = await AsyncStorage.getItem('userRole');
+        const storedRole = await SecureStore.getItemAsync('userRole');
+        const storedUid = await SecureStore.getItemAsync('userUid');
+        
         if (storedRole) {
           setUserRole(storedRole);
         }
+        if (storedUid) {
+          // Pre-populate a fake user envelope structurally mapped just to `uid` 
+          // to bypass layout redirect flashes completely on boot!
+          setCurrentUser({ uid: storedUid });
+        }
       } catch (error) {
-        console.error("Error reading persisted role:", error);
+        console.error("Error reading persisted auth data:", error);
       }
     };
 
-    checkPersistedRole();
+    checkPersistedData();
 
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setCurrentUser(user);
+      // Overwrite the cached proxy explicitly once the socket validates natively
+      if (user) {
+         setCurrentUser(user);
+         SecureStore.setItemAsync('userUid', user.uid);
+      } else {
+         setCurrentUser(null);
+         SecureStore.deleteItemAsync('userUid');
+      }
       setLoading(false);
     });
 
@@ -38,7 +52,8 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password, role) => {
     try {
       const user = await signIn(email, password);
-      await AsyncStorage.setItem('userRole', role);
+      await SecureStore.setItemAsync('userRole', role);
+      await SecureStore.setItemAsync('userUid', user.uid);
       setUserRole(role);
       setCurrentUser(user);
     } catch (error) {
@@ -49,11 +64,10 @@ export const AuthProvider = ({ children }) => {
   const register = async (email, password, role, profileData) => {
     try {
       const user = await signUp(email, password);
-      await AsyncStorage.setItem('userRole', role);
+      await SecureStore.setItemAsync('userRole', role);
+      await SecureStore.setItemAsync('userUid', user.uid);
       setUserRole(role);
       setCurrentUser(user);
-      // Profile document creation logic mapping to profileData should be handled 
-      // globally or inside the register flow based on use-case later.
     } catch (error) {
       throw error;
     }
@@ -62,16 +76,17 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     try {
       await authServiceSignOut();
-      await AsyncStorage.removeItem('userRole');
+      await SecureStore.deleteItemAsync('userRole');
+      await SecureStore.deleteItemAsync('userUid');
       setUserRole(null);
-      // currentUser will automatically become null from onAuthStateChanged
+      setCurrentUser(null);
     } catch (error) {
       throw error;
     }
   };
 
   const setSessionRole = async (role) => {
-    await AsyncStorage.setItem('userRole', role);
+    await SecureStore.setItemAsync('userRole', role);
     setUserRole(role);
   };
 

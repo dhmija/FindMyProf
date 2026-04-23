@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Animated } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Animated, KeyboardAvoidingView, Platform } from "react-native";
 import { useAuth } from "../../context/AuthContext";
 import { Link } from "expo-router";
 
@@ -37,7 +37,6 @@ export default function LoginScreen() {
     setLoading(true);
     try {
       await login(email, password, role);
-      // Let _layout.tsx handle the forward redirect automatically once state updates.
     } catch (err) {
       setError(err.message || "Invalid email or password.");
       setLoading(false);
@@ -45,61 +44,63 @@ export default function LoginScreen() {
   };
 
   return (
-    <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
-      <Text style={styles.title}>FindMyProf</Text>
-      <Text style={styles.subtitle}>Login to your account</Text>
-      
-      {error ? <View style={styles.errorContainer}><Text style={styles.errorText}>{error}</Text></View> : null}
+    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
+      <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
+        <Text style={styles.title}>FindMyProf</Text>
+        <Text style={styles.subtitle}>Login to your account</Text>
+        
+        {error ? <View style={styles.errorContainer}><Text style={styles.errorText}>{error}</Text></View> : null}
 
-      <TextInput
-        style={styles.input}
-        placeholder="College Email"
-        autoCapitalize="none"
-        keyboardType="email-address"
-        returnKeyType="next"
-        value={email}
-        onChangeText={setEmail}
-      />
+        <TextInput
+          style={styles.input}
+          placeholder="College Email"
+          autoCapitalize="none"
+          keyboardType="email-address"
+          returnKeyType="next"
+          value={email}
+          onChangeText={setEmail}
+        />
 
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        secureTextEntry
-        returnKeyType="done"
-        value={password}
-        onChangeText={setPassword}
-        onSubmitEditing={handleLogin}
-      />
+        <TextInput
+          style={styles.input}
+          placeholder="Password"
+          secureTextEntry
+          returnKeyType="done"
+          value={password}
+          onChangeText={setPassword}
+          onSubmitEditing={handleLogin}
+        />
 
-      <Text style={styles.roleLabel}>I am a:</Text>
-      <View style={styles.roleContainer}>
-        <TouchableOpacity 
-          style={[styles.roleButton, role === "student" && styles.roleActive]}
-          onPress={() => setRole("student")}
-        >
-          <Text style={[styles.roleText, role === "student" && styles.roleActiveText]}>Student</Text>
+        <Text style={styles.roleLabel}>I am a:</Text>
+        <View style={styles.roleContainer}>
+          <TouchableOpacity 
+            style={[styles.roleButton, role === "student" && styles.roleActive]}
+            onPress={() => setRole("student")}
+          >
+            <Text style={[styles.roleText, role === "student" && styles.roleActiveText]}>Student</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[styles.roleButton, role === "faculty" && styles.roleActive]}
+            onPress={() => setRole("faculty")}
+          >
+            <Text style={[styles.roleText, role === "faculty" && styles.roleActiveText]}>Faculty</Text>
+          </TouchableOpacity>
+        </View>
+
+        <TouchableOpacity style={styles.loginBtn} onPress={handleLogin} disabled={loading}>
+          {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.loginBtnText}>Login</Text>}
         </TouchableOpacity>
-        <TouchableOpacity 
-          style={[styles.roleButton, role === "faculty" && styles.roleActive]}
-          onPress={() => setRole("faculty")}
-        >
-          <Text style={[styles.roleText, role === "faculty" && styles.roleActiveText]}>Faculty</Text>
-        </TouchableOpacity>
-      </View>
 
-      <TouchableOpacity style={styles.loginBtn} onPress={handleLogin} disabled={loading}>
-        {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.loginBtnText}>Login</Text>}
-      </TouchableOpacity>
-
-      <View style={styles.linkContainer}>
-        <Link href="/auth/student-signup" asChild>
-          <TouchableOpacity style={styles.linkWrapper}><Text style={styles.link}>New Student? Sign up</Text></TouchableOpacity>
-        </Link>
-        <Link href="/auth/faculty-signup" asChild>
-           <TouchableOpacity style={styles.linkWrapper}><Text style={styles.link}>New Faculty? Sign up</Text></TouchableOpacity>
-        </Link>
-      </View>
-    </Animated.View>
+        <View style={styles.linkContainer}>
+          <Link href="/auth/student-signup" asChild>
+            <TouchableOpacity style={styles.linkWrapper}><Text style={styles.link}>New Student? Sign up</Text></TouchableOpacity>
+          </Link>
+          <Link href="/auth/faculty-signup" asChild>
+             <TouchableOpacity style={styles.linkWrapper}><Text style={styles.link}>New Faculty? Sign up</Text></TouchableOpacity>
+          </Link>
+        </View>
+      </Animated.View>
+    </KeyboardAvoidingView>
   );
 }
 

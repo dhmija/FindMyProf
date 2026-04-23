@@ -16,7 +16,6 @@ export default function OfficeHoursBookingIndex() {
 
     const bookingsRef = collection(firestore, 'bookings');
     
-    // Role based condition dynamically listening natively
     const fieldConstraint = role === 'student' ? 'studentId' : 'facultyId';
     
     const q = query(
@@ -24,6 +23,8 @@ export default function OfficeHoursBookingIndex() {
       where(fieldConstraint, '==', user.uid),
       orderBy('createdAt', 'desc')
     );
+
+    let fallbackUnsubscribe = null;
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const liveBookings = snapshot.docs.map(doc => ({
@@ -34,9 +35,8 @@ export default function OfficeHoursBookingIndex() {
       setLoading(false);
     }, (error) => {
       console.error(error);
-      // Fallback query without orderBy if index is missing from fresh Firestore setup
       const fallbackQ = query(bookingsRef, where(fieldConstraint, '==', user.uid));
-      onSnapshot(fallbackQ, (fallbackSnap) => {
+      fallbackUnsubscribe = onSnapshot(fallbackQ, (fallbackSnap) => {
           const fbBookings = fallbackSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
           fbBookings.sort((a,b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
           setBookings(fbBookings);
@@ -44,7 +44,12 @@ export default function OfficeHoursBookingIndex() {
       });
     });
 
-    return () => unsubscribe();
+    return () => {
+      unsubscribe();
+      if (fallbackUnsubscribe) {
+         fallbackUnsubscribe();
+      }
+    };
   }, [user, role]);
 
   const handleUpdateStatus = async (bookingId, newStatus) => {
