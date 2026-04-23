@@ -32,7 +32,7 @@ function RootNavigation() {
       if (inAuthGroup || segments.length === 0) {
         if (role === 'faculty') {
           router.replace('/faculty/home');
-        } else {
+        } else if (role === 'student') {
           router.replace('/student/home');
         }
       }

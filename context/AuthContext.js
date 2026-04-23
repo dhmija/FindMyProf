@@ -70,8 +70,13 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const setSessionRole = async (role) => {
+    await AsyncStorage.setItem('userRole', role);
+    setUserRole(role);
+  };
+
   return (
-    <AuthContext.Provider value={{ user: currentUser, role: userRole, loading, login, logout, register }}>
+    <AuthContext.Provider value={{ user: currentUser, role: userRole, loading, login, logout, register, setSessionRole }}>
       {children}
     </AuthContext.Provider>
   );
