@@ -29,25 +29,25 @@ function RootNavigation() {
   useEffect(() => {
     if (loading || splashVisible || hasSeenOnboarding === null) return;
 
-    const inAuthGroup = segments[0] === 'auth';
-    const isSpecialRoute = segments[0] === 'onboarding';
+    if (segments.length === 0 || segments.join('/') === '') {
+      if (hasSeenOnboarding !== 'true') {
+        router.replace('/onboarding');
+      } else if (!user) {
+        router.replace('/directory/index');
+      } else {
+        router.replace(`/${role}/home`);
+      }
+      return;
+    }
 
-    if (!user) {
-      if (!inAuthGroup && !isSpecialRoute) {
-        if (hasSeenOnboarding === 'true') {
-          router.replace('/auth/login');
-        } else {
-          router.replace('/onboarding');
-        }
-      }
-    } else if (user) {
-      if (inAuthGroup || isSpecialRoute || segments.length === 0) {
-        if (role === 'faculty') {
-          router.replace('/faculty/home');
-        } else if (role === 'student') {
-          router.replace('/student/home');
-        }
-      }
+    const isProtectedStudent = segments[0] === '(drawer)' && segments[1] === 'student';
+    const isProtectedFaculty = segments[0] === '(drawer)' && segments[1] === 'faculty';
+    const isProtectedMessages = segments[0] === '(drawer)' && segments[1] === 'messages';
+    const isProtectedOffice = segments[0] === '(drawer)' && segments[1] === 'office-hours';
+    const isProtected = isProtectedStudent || isProtectedFaculty || isProtectedMessages || isProtectedOffice;
+
+    if (!user && isProtected) {
+      router.replace('/auth/login');
     }
   }, [user, role, loading, splashVisible, segments, hasSeenOnboarding]);
 

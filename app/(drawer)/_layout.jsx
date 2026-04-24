@@ -5,7 +5,7 @@ import { View, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 
 function CustomDrawerContent(props) {
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
   const router = useRouter();
 
   const handleLogout = async () => {
@@ -23,60 +23,65 @@ function CustomDrawerContent(props) {
         <DrawerItemList {...props} />
       </DrawerContentScrollView>
       <View style={styles.logoutContainer}>
-        <DrawerItem label="Logout" onPress={handleLogout} />
+        {user ? (
+           <DrawerItem label="Logout" onPress={handleLogout} />
+        ) : (
+           <DrawerItem label="Login or Sign Up" onPress={() => router.push("/auth/login")} />
+        )}
       </View>
     </View>
   );
 }
 
 export default function DrawerLayout() {
-  const { role } = useAuth();
+  const { user, role } = useAuth();
 
   return (
     <Drawer screenOptions={{ headerShown: true }} drawerContent={(props) => <CustomDrawerContent {...props} />}>
-      {/* Render both homes but hide the irrelevant one visually from the drawer based on role */}
+      <Drawer.Screen 
+        name="directory/index" 
+        options={{ 
+          drawerLabel: 'Faculty Directory',
+          headerTitle: 'Search'
+        }} 
+      />
       <Drawer.Screen 
         name="student/home" 
         options={{ 
-          drawerLabel: 'Home', 
+          drawerLabel: 'My Dashboard', 
           headerTitle: 'Student Home',
-          drawerItemStyle: { display: role === 'student' ? 'flex' : 'none' } 
+          drawerItemStyle: { display: user && role === 'student' ? 'flex' : 'none' } 
         }} 
       />
       <Drawer.Screen 
         name="faculty/home" 
         options={{ 
-          drawerLabel: 'Home', 
+          drawerLabel: 'My Dashboard', 
           headerTitle: 'Faculty Home',
-          drawerItemStyle: { display: role === 'faculty' ? 'flex' : 'none' } 
-        }} 
-      />
-      <Drawer.Screen 
-        name="directory/index" 
-        options={{ 
-          drawerLabel: 'Directory',
-          headerTitle: 'Faculty Directory'
+          drawerItemStyle: { display: user && role === 'faculty' ? 'flex' : 'none' } 
         }} 
       />
       <Drawer.Screen 
         name="directory/[id]" 
         options={{ 
           drawerLabel: 'Directory Details', 
-          drawerItemStyle: { display: 'none' } // Hide dynamic route from drawer tab list
+          drawerItemStyle: { display: 'none' } 
         }} 
       />
       <Drawer.Screen 
         name="messages/index" 
         options={{ 
           drawerLabel: 'Messages',
-          headerTitle: 'Messages'
+          headerTitle: 'Messages',
+          drawerItemStyle: { display: user ? 'flex' : 'none' }
         }} 
       />
       <Drawer.Screen 
         name="office-hours/index" 
         options={{ 
           drawerLabel: 'Office Hours',
-          headerTitle: 'Office Hours'
+          headerTitle: 'Office Hours',
+          drawerItemStyle: { display: user ? 'flex' : 'none' }
         }} 
       />
       <Drawer.Screen 
@@ -84,7 +89,7 @@ export default function DrawerLayout() {
         options={{ 
           drawerLabel: 'My Profile', 
           headerTitle: 'My Profile',
-          drawerItemStyle: { display: role === 'faculty' ? 'flex' : 'none' } 
+          drawerItemStyle: { display: user && role === 'faculty' ? 'flex' : 'none' } 
         }} 
       />
     </Drawer>
@@ -95,6 +100,6 @@ const styles = StyleSheet.create({
   logoutContainer: {
     paddingBottom: 20,
     borderTopWidth: 1,
-    borderTopColor: '#e0e0e0',
+    borderTopColor: '#F0F0F0',
   }
 });

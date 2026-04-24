@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Animated, KeyboardAvoidingView, Platform } from "react-native";
 import { useAuth } from "../../context/AuthContext";
-import { Link } from "expo-router";
+import { Link, useLocalSearchParams, useRouter } from "expo-router";
 
 export default function LoginScreen() {
   const { login } = useAuth();
+  const { returnTo } = useLocalSearchParams();
+  const router = useRouter();
   
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -37,6 +39,11 @@ export default function LoginScreen() {
     setLoading(true);
     try {
       await login(email, password, role);
+      if (returnTo) {
+          router.replace(returnTo);
+      } else {
+          router.replace(`/${role}/home`);
+      }
     } catch (err) {
       setError(err.message || "Invalid email or password.");
       setLoading(false);

@@ -4,6 +4,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { doc, onSnapshot, collection, query, where } from 'firebase/firestore';
 import { firestore } from '../../../services/firebase';
 import StatusBadge from '../../../components/StatusBadge';
+import AuthGateSheet from '../../../components/AuthGateSheet';
 import { useAuth } from '../../../context/AuthContext';
 import { sendQuickNotify } from '../../../services/chatService';
 import { requestBooking } from '../../../services/bookingService';
@@ -19,7 +20,20 @@ export default function DirectoryDetail() {
   const [loading, setLoading] = useState(true);
   const [notifyLoading, setNotifyLoading] = useState(false);
   const [bookedSlots, setBookedSlots] = useState([]);
-  const [bookingLoading, setBookingLoading] = useState(null); // id of slot
+  const [bookingLoading, setBookingLoading] = useState(null); 
+
+  // Auth Gate State
+  const [authGateVisible, setAuthGateVisible] = useState(false);
+  const [authGateMessage, setAuthGateMessage] = useState("");
+
+  const handleAuthGate = (message, action) => {
+    if (!user) {
+       setAuthGateMessage(message);
+       setAuthGateVisible(true);
+    } else {
+       action();
+    }
+  };
 
   useEffect(() => {
     if (!id) return;
@@ -27,7 +41,6 @@ export default function DirectoryDetail() {
     setLoading(true);
     const docRef = doc(firestore, 'faculties', id);
     
-    // Set up real-time listener for live status updates
     const unsubscribeProfile = onSnapshot(docRef, (docSnap) => {
       if (docSnap.exists()) {
         setFaculty({ id: docSnap.id, ...docSnap.data() });
@@ -40,7 +53,6 @@ export default function DirectoryDetail() {
       setLoading(false);
     });
 
-    // Real-time listener for booked slots
     const bookingsRef = collection(firestore, 'bookings');
     const q = query(bookingsRef, where('facultyId', '==', id), where('status', 'in', ['pending', 'confirmed']));
     
@@ -62,10 +74,14 @@ export default function DirectoryDetail() {
   };
 
   const handleQuickNotify = async () => {
+    if (role !== 'student') {
+        alert("Only students can notify faculty members.");
+        return;
+    }
     setNotifyLoading(true);
     try {
       if (user?.uid && faculty?.id) {
-         let studentName = role === 'student' ? (profile?.fullName || profile?.name) : 'Student';
+         let studentName = profile?.fullName || profile?.name || 'Student';
          await sendQuickNotify(faculty.id, user.uid, faculty.name, studentName);
          alert("Teacher notified!");
       }
@@ -77,7 +93,7 @@ export default function DirectoryDetail() {
   };
   
   const handleBookSlot = async (slotString) => {
-    if (!user || role !== 'student') {
+    if (role !== 'student') {
         alert("Only students can book office hours.");
         return;
     }
@@ -115,130 +131,144 @@ export default function DirectoryDetail() {
     );
   }
 
-  // Determine Initials Fallback
   const initials = faculty.name ? faculty.name.split(' ').map(n => n[0]).join('').substring(0, 2) : '?';
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
-      
-      {/* 1. Header & Avatar Block */}
-      <View style={styles.headerBlock}>
-        <View style={styles.avatar}>
-          <Text style={styles.avatarText}>{initials}</Text>
-        </View>
-        <Text style={styles.name}>{faculty.name}</Text>
-        <Text style={styles.department}>{faculty.department}</Text>
+    <>
+      <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
         
-        {faculty.isRegistered && (
-          <View style={styles.badgeWrapper}>
-            <StatusBadge status={faculty.status} />
+        {/* Header & Avatar Block */}
+        <View style={styles.headerBlock}>
+          <View style={styles.avatar}>
+            <Text style={styles.avatarText}>{initials}</Text>
           </View>
-        )}
-      </View>
-
-      {/* 2. Unregistered View vs Registered View */}
-      {!faculty.isRegistered ? (
-        <View style={styles.card}>
-          <View style={styles.unregisteredBanner}>
-            <Text style={styles.unregisteredText}>Faculty hasn't joined FindMyProf yet</Text>
-          </View>
+          <Text style={styles.name}>{faculty.name}</Text>
+          <Text style={styles.department}>{faculty.department}</Text>
           
-          <View style={styles.infoRow}>
-            <Text style={styles.label}>Location:</Text>
-            <Text style={styles.value}>Block {faculty.block} • Floor {faculty.floor} • Cubicle {faculty.cubicle}</Text>
-          </View>
-          
-          <TouchableOpacity style={styles.primaryButton} onPress={handleEmail}>
-            <Text style={styles.primaryButtonText}>Send an Email</Text>
-          </TouchableOpacity>
-        </View>
-      ) : (
-        <>
-          {/* Registered Interactive Banner */}
-          <View style={styles.actionRow}>
-            {faculty.acceptsMessages && (
-              <TouchableOpacity style={[styles.actionButton, styles.msgButton]} onPress={navigateToChat}>
-                <Text style={styles.actionButtonText}>Send Message</Text>
-              </TouchableOpacity>
-            )}
-            <TouchableOpacity 
-              style={[styles.actionButton, styles.notifyButton]} 
-              onPress={handleQuickNotify}
-              disabled={notifyLoading}
-            >
-              {notifyLoading ? <ActivityIndicator color="#fff" size="small"/> : <Text style={styles.actionButtonText}>I'm heading to your office</Text>}
-            </TouchableOpacity>
-          </View>
-
-          {faculty.substitutionNotice ? (
-            <View style={styles.noticeBanner}>
-              <Text style={styles.noticeText}>⚠️ Notice: {faculty.substitutionNotice}</Text>
+          {faculty.isRegistered && (
+            <View style={styles.badgeWrapper}>
+              <StatusBadge status={faculty.status} />
             </View>
-          ) : null}
+          )}
+        </View>
 
-          {/* Details Card */}
+        {/* Action Row */}
+        {!faculty.isRegistered ? (
           <View style={styles.card}>
-             <View style={styles.infoRow}>
+            <View style={styles.unregisteredBanner}>
+              <Text style={styles.unregisteredText}>Faculty hasn't joined FindMyProf yet</Text>
+            </View>
+            
+            <View style={styles.infoRow}>
               <Text style={styles.label}>Location:</Text>
               <Text style={styles.value}>Block {faculty.block} • Floor {faculty.floor} • Cubicle {faculty.cubicle}</Text>
             </View>
-            <View style={styles.infoRow}>
-              <Text style={styles.label}>Email:</Text>
-              <Text style={styles.value}>{faculty.email}</Text>
+            
+            <TouchableOpacity style={styles.primaryButton} onPress={handleEmail}>
+              <Text style={styles.primaryButtonText}>Send an Email</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <>
+            <View style={styles.actionRow}>
+              {faculty.acceptsMessages && (
+                <TouchableOpacity 
+                  style={[styles.actionButton, styles.msgButton]} 
+                  onPress={() => handleAuthGate("Login required to send a direct message.", navigateToChat)}
+                >
+                  <Text style={styles.actionButtonText}>Send Message</Text>
+                </TouchableOpacity>
+              )}
+              <TouchableOpacity 
+                style={[styles.actionButton, styles.notifyButton]} 
+                onPress={() => handleAuthGate("Login required to notify the faculty that you're heading over.", handleQuickNotify)}
+                disabled={notifyLoading}
+              >
+                {notifyLoading ? <ActivityIndicator color="#fff" size="small"/> : <Text style={styles.actionButtonText}>I'm heading to your office</Text>}
+              </TouchableOpacity>
             </View>
-          </View>
 
-          {/* Office Hours */}
-          <View style={styles.card}>
-            <Text style={styles.cardTitle}>Office Hours Bookings</Text>
-            {faculty.officeHours && faculty.officeHours.length > 0 ? (
-              faculty.officeHours.map((slot, index) => {
-                const isBooked = bookedSlots.includes(slot);
-                const isLoading = bookingLoading === slot;
-                
-                return (
-                  <View key={index} style={styles.slotRow}>
-                    <Text style={[styles.slotText, isBooked && styles.slotTextMuted]}>• {slot}</Text>
-                    {isBooked ? (
-                      <View style={styles.bookedBadge}>
-                         <Text style={styles.bookedText}>Unavailable</Text>
-                      </View>
-                    ) : (role === 'student' && (
-                      <TouchableOpacity 
-                        style={styles.bookButton} 
-                        disabled={isLoading} 
-                        onPress={() => handleBookSlot(slot)}
-                      >
-                        {isLoading ? <ActivityIndicator color="#1E90FF" size="small" /> : <Text style={styles.bookText}>Book Slot</Text>}
-                      </TouchableOpacity>
-                    ))}
-                  </View>
-                );
-              })
-            ) : (
-              <Text style={styles.mutedText}>No office hours posted.</Text>
-            )}
-          </View>
+            {faculty.substitutionNotice ? (
+              <View style={styles.noticeBanner}>
+                <Text style={styles.noticeText}>⚠️ Notice: {faculty.substitutionNotice}</Text>
+              </View>
+            ) : null}
 
-          {/* Subjects List */}
-          <View style={styles.card}>
-            <Text style={styles.cardTitle}>Subjects Taught</Text>
-            {faculty.subjects && faculty.subjects.length > 0 ? (
-               <View style={styles.pillContainer}>
-                 {faculty.subjects.map((sub, idx) => (
-                   <View key={idx} style={styles.pill}>
-                     <Text style={styles.pillText}>{sub}</Text>
-                   </View>
-                 ))}
-               </View>
-            ) : (
-              <Text style={styles.mutedText}>No subjects listed.</Text>
-            )}
-          </View>
-        </>
-      )}
+            {/* Details Card */}
+            <View style={styles.card}>
+               <View style={styles.infoRow}>
+                <Text style={styles.label}>Location:</Text>
+                <Text style={styles.value}>Block {faculty.block} • Floor {faculty.floor} • Cubicle {faculty.cubicle}</Text>
+              </View>
+              <View style={styles.infoRow}>
+                <Text style={styles.label}>Email:</Text>
+                <Text style={styles.value}>{faculty.email}</Text>
+              </View>
+            </View>
 
-    </ScrollView>
+            {/* Office Hours */}
+            <View style={styles.card}>
+              <Text style={styles.cardTitle}>Office Hours Bookings</Text>
+              {faculty.officeHours && faculty.officeHours.length > 0 ? (
+                faculty.officeHours.map((slot, index) => {
+                  const isBooked = bookedSlots.includes(slot);
+                  const isLoading = bookingLoading === slot;
+                  
+                  return (
+                    <View key={index} style={styles.slotRow}>
+                      <Text style={[styles.slotText, isBooked && styles.slotTextMuted]}>• {slot}</Text>
+                      {isBooked ? (
+                        <View style={styles.bookedBadge}>
+                           <Text style={styles.bookedText}>Unavailable</Text>
+                        </View>
+                      ) : (
+                        // Render standard book button for everyone, hit auth gate if unauthenticated implicitly via internal hook natively
+                        // Only hide completely if they are authenticated AND a faculty explicitly preventing loopbacks natively
+                        ((!user || role === 'student') && (
+                          <TouchableOpacity 
+                            style={styles.bookButton} 
+                            disabled={isLoading} 
+                            onPress={() => handleAuthGate("Login required to secure an office hours slot.", () => handleBookSlot(slot))}
+                          >
+                            {isLoading ? <ActivityIndicator color="#1E90FF" size="small" /> : <Text style={styles.bookText}>Book Slot</Text>}
+                          </TouchableOpacity>
+                        ))
+                      )}
+                    </View>
+                  );
+                })
+              ) : (
+                <Text style={styles.mutedText}>No office hours posted.</Text>
+              )}
+            </View>
+
+            {/* Subjects List */}
+            <View style={styles.card}>
+              <Text style={styles.cardTitle}>Subjects Taught</Text>
+              {faculty.subjects && faculty.subjects.length > 0 ? (
+                 <View style={styles.pillContainer}>
+                   {faculty.subjects.map((sub, idx) => (
+                     <View key={idx} style={styles.pill}>
+                       <Text style={styles.pillText}>{sub}</Text>
+                     </View>
+                   ))}
+                 </View>
+              ) : (
+                <Text style={styles.mutedText}>No subjects listed.</Text>
+              )}
+            </View>
+          </>
+        )}
+      </ScrollView>
+
+      {/* Embedded Dynamic AuthGate */}
+      <AuthGateSheet 
+         visible={authGateVisible} 
+         onClose={() => setAuthGateVisible(false)} 
+         actionMessage={authGateMessage}
+         returnTo={`/directory/${id}`}
+      />
+    </>
   );
 }
 
@@ -353,6 +383,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: 8,
     alignItems: 'center',
+    paddingHorizontal: 8,
   },
   msgButton: {
     backgroundColor: '#1E90FF',
@@ -363,7 +394,8 @@ const styles = StyleSheet.create({
   actionButtonText: {
     color: '#FFF',
     fontWeight: 'bold',
-    fontSize: 13,
+    fontSize: 12,
+    textAlign: 'center',
   },
   noticeBanner: {
     backgroundColor: '#FFF3E0',
