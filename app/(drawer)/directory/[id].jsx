@@ -161,7 +161,11 @@ export default function DirectoryDetail() {
             
             <View style={styles.infoRow}>
               <Text style={styles.label}>Location:</Text>
-              <Text style={styles.value}>Block {faculty.block} • Floor {faculty.floor} • Cubicle {faculty.cubicle}</Text>
+              <Text style={styles.value}>
+                {faculty.block === 'M'
+                  ? `M Block · Floor ${faculty.floor} · Cubicle ${faculty.cubicle}`
+                  : `${faculty.block} Block · Cubicle ${faculty.cubicle}`}
+              </Text>
             </View>
             
             <TouchableOpacity style={styles.primaryButton} onPress={handleEmail}>
@@ -198,7 +202,11 @@ export default function DirectoryDetail() {
             <View style={styles.card}>
                <View style={styles.infoRow}>
                 <Text style={styles.label}>Location:</Text>
-                <Text style={styles.value}>Block {faculty.block} • Floor {faculty.floor} • Cubicle {faculty.cubicle}</Text>
+                <Text style={styles.value}>
+                  {faculty.block === 'M'
+                    ? `M Block · Floor ${faculty.floor} · Cubicle ${faculty.cubicle}`
+                    : `${faculty.block} Block · Cubicle ${faculty.cubicle}`}
+                </Text>
               </View>
               <View style={styles.infoRow}>
                 <Text style={styles.label}>Email:</Text>

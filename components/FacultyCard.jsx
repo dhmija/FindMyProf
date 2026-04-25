@@ -63,7 +63,11 @@ const FacultyCard = React.memo(({ faculty }) => {
       <Text style={styles.department}>{department}</Text>
       
       <View style={styles.locationRow}>
-        <Text style={styles.locationText}>Block {block} • Floor {floor} • Cubicle {cubicle}</Text>
+        <Text style={styles.locationText}>
+          {block === 'M'
+            ? `M Block · Floor ${floor} · Cubicle ${cubicle}`
+            : `${block} Block · Cubicle ${cubicle}`}
+        </Text>
       </View>
     </TouchableOpacity>
   );

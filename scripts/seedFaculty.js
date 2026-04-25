@@ -167,6 +167,70 @@ const facultiesData = [
     officeHours: ["Monday 3:00 PM - 5:00 PM"],
     substitutionNotice: "On leave until next week.",
     photoURL: null
+  },
+
+  // N1 Block (single floor — no floor field)
+  {
+    name: "Dr. James Nair",
+    department: "Chemistry",
+    block: "N1",
+    cubicle: "N1-05",
+    email: "james.nair@placeholder.edu",
+    subjects: ["Organic Chemistry", "Physical Chemistry"],
+    phone: null,
+    isRegistered: false,
+    status: "unknown",
+    acceptsMessages: false,
+    officeHours: [],
+    substitutionNotice: null,
+    photoURL: null
+  },
+  {
+    name: "Prof. Karen Mehta",
+    department: "Biotechnology",
+    block: "N1",
+    cubicle: "N1-11",
+    email: "karen.mehta@placeholder.edu",
+    subjects: ["Genetics", "Cell Biology"],
+    phone: null,
+    isRegistered: false,
+    status: "unknown",
+    acceptsMessages: false,
+    officeHours: ["Tuesday 10:00 AM - 12:00 PM"],
+    substitutionNotice: null,
+    photoURL: null
+  },
+
+  // N2 Block (single floor — no floor field)
+  {
+    name: "Dr. Leo Fernandes",
+    department: "Business Administration",
+    block: "N2",
+    cubicle: "N2-03",
+    email: "leo.fernandes@placeholder.edu",
+    subjects: ["Marketing", "Business Strategy"],
+    phone: null,
+    isRegistered: false,
+    status: "unknown",
+    acceptsMessages: false,
+    officeHours: [],
+    substitutionNotice: null,
+    photoURL: null
+  },
+  {
+    name: "Prof. Mira Joshi",
+    department: "Economics",
+    block: "N2",
+    cubicle: "N2-09",
+    email: "mira.joshi@placeholder.edu",
+    subjects: ["Microeconomics", "Development Economics"],
+    phone: null,
+    isRegistered: false,
+    status: "unknown",
+    acceptsMessages: false,
+    officeHours: ["Friday 2:00 PM - 4:00 PM"],
+    substitutionNotice: null,
+    photoURL: null
   }
 ];
 
@@ -179,7 +243,8 @@ async function seedDatabase() {
       // We'll use random auto-generated IDs here to keep things simple.
       const facultyRef = doc(collection(db, "faculties")); 
       await setDoc(facultyRef, faculty);
-      console.log(`Successfully added: ${faculty.name} (Floor ${faculty.floor})`);
+      const location = faculty.floor != null ? `Floor ${faculty.floor}` : faculty.block;
+      console.log(`Successfully added: ${faculty.name} (${faculty.block} Block${faculty.floor != null ? ` · Floor ${faculty.floor}` : ''})`);
     }
     
     console.log("Database seeding completed successfully!");

@@ -5,7 +5,7 @@ import { getAllFaculties } from '../../../services/facultyService';
 import FacultyCard from '../../../components/FacultyCard';
 
 const BLOCKS = ['All', 'M', 'N1', 'N2'];
-const FLOORS = ['All', '1', '2', '3'];
+const FLOORS = ['1', '2', '3'];
 
 export default function DirectoryIndex() {
   const [faculties, setFaculties] = useState([]);
@@ -13,7 +13,7 @@ export default function DirectoryIndex() {
   const [searchText, setSearchText] = useState('');
   
   const [filterBlock, setFilterBlock] = useState('All');
-  const [filterFloor, setFilterFloor] = useState('All');
+  const [filterFloor, setFilterFloor] = useState(null);
 
   const fetchFaculties = useCallback(async () => {
     try {
@@ -43,6 +43,10 @@ export default function DirectoryIndex() {
 
   const handleBlockChange = useCallback((block) => {
     setFilterBlock(block);
+    // Reset floor filter when switching to a block that has no floors
+    if (block !== 'M') {
+      setFilterFloor(null);
+    }
   }, []);
 
   const handleFloorChange = useCallback((floor) => {
@@ -58,7 +62,7 @@ export default function DirectoryIndex() {
         (Array.isArray(f.subjects) && f.subjects.some(s => s.toLowerCase().includes(query)));
         
       const matchesBlock = filterBlock === 'All' || f.block === filterBlock;
-      const matchesFloor = filterFloor === 'All' || f.floor?.toString() === filterFloor;
+      const matchesFloor = filterFloor === null || f.floor?.toString() === filterFloor;
       
       return matchesSearch && matchesBlock && matchesFloor;
     });
@@ -104,18 +108,22 @@ export default function DirectoryIndex() {
             </TouchableOpacity>
           ))}
           
-          <View style={styles.filterDivider} />
-          
-          <Text style={styles.filterLabel}>Floor:</Text>
-          {FLOORS.map(floor => (
-            <TouchableOpacity 
-              key={`floor-${floor}`} 
-              style={[styles.chip, filterFloor === floor && styles.chipActive]}
-              onPress={() => handleFloorChange(floor)}
-            >
-              <Text style={[styles.chipText, filterFloor === floor && styles.chipActiveText]}>{floor}</Text>
-            </TouchableOpacity>
-          ))}
+          {filterBlock === 'M' && (
+            <>
+              <View style={styles.filterDivider} />
+              
+              <Text style={styles.filterLabel}>Floor:</Text>
+              {FLOORS.map(floor => (
+                <TouchableOpacity 
+                  key={`floor-${floor}`} 
+                  style={[styles.chip, filterFloor === floor && styles.chipActive]}
+                  onPress={() => handleFloorChange(floor)}
+                >
+                  <Text style={[styles.chipText, filterFloor === floor && styles.chipActiveText]}>{floor}</Text>
+                </TouchableOpacity>
+              ))}
+            </>
+          )}
         </ScrollView>
       </View>
 
