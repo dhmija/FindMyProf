@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import * as SecureStore from 'expo-secure-store';
 import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from '../services/firebase';
+import { auth, firestore } from '../services/firebase';
+import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
 import { signIn, signUp, signOut as authServiceSignOut } from '../services/authService';
 
 const AuthContext = createContext();
@@ -52,6 +53,23 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password, role) => {
     try {
       const user = await signIn(email, password);
+      
+      // Prevent cross-login (e.g., student logging in as faculty)
+      if (role === 'faculty') {
+        const facQ = query(collection(firestore, 'faculties'), where('email', '==', email));
+        const facSnap = await getDocs(facQ);
+        if (facSnap.empty) {
+          await authServiceSignOut();
+          throw new Error("Access denied. No faculty profile found for this account.");
+        }
+      } else if (role === 'student') {
+        const docSnap = await getDoc(doc(firestore, 'students', user.uid));
+        if (!docSnap.exists()) {
+          await authServiceSignOut();
+          throw new Error("Access denied. No student profile found for this account.");
+        }
+      }
+
       await SecureStore.setItemAsync('userRole', role);
       await SecureStore.setItemAsync('userUid', user.uid);
       setUserRole(role);
