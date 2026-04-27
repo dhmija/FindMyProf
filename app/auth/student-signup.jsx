@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Animated, ScrollView } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Animated, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
 import { useAuth } from "../../context/AuthContext";
 import { signUp } from "../../services/authService";
 import { setDoc, doc } from "firebase/firestore";
@@ -84,7 +84,12 @@ export default function StudentSignupScreen() {
 
 
   return (
-    <Animated.ScrollView style={{ flex: 1, backgroundColor: '#F5F5F5', opacity: fadeAnim }} contentContainerStyle={styles.container}>
+    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
+      <Animated.ScrollView 
+        style={{ flex: 1, backgroundColor: '#F5F5F5', opacity: fadeAnim }} 
+        contentContainerStyle={[styles.container, { flexGrow: 1 }]}
+        keyboardShouldPersistTaps="handled"
+      >
       <Text style={styles.title}>Student Signup</Text>
       <Text style={styles.subtitle}>Create your FindMyProf account</Text>
       
@@ -154,7 +159,8 @@ export default function StudentSignupScreen() {
           <TouchableOpacity style={styles.linkWrapper}><Text style={styles.link}>Already have an account? Login</Text></TouchableOpacity>
         </Link>
       </View>
-    </Animated.ScrollView>
+      </Animated.ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 

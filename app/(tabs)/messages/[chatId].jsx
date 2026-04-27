@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, TextInput, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
 import { useLocalSearchParams, useRouter, useNavigation } from 'expo-router';
+import { useHeaderHeight } from '@react-navigation/elements';
 import { collection, query, orderBy, onSnapshot, doc, getDoc } from 'firebase/firestore';
 import { firestore } from '../../../services/firebase';
 import { useAuth } from '../../../context/AuthContext';
@@ -12,6 +13,7 @@ export default function ChatScreen() {
   const { user, role } = useAuth();
   const { profile } = useProfile();
   const navigation = useNavigation();
+  const headerHeight = useHeaderHeight();
   
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState('');
@@ -97,7 +99,7 @@ export default function ChatScreen() {
   };
 
   return (
-    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.container} keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}>
+    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container} keyboardVerticalOffset={headerHeight}>
       {!facultyAllowed && (
         <View style={styles.disabledBanner}>
           <Text style={styles.disabledBannerText}>This faculty is currently not accepting direct messages.</Text>
@@ -115,6 +117,7 @@ export default function ChatScreen() {
           renderItem={renderMessage}
           inverted
           contentContainerStyle={styles.listContent}
+          keyboardShouldPersistTaps="handled"
         />
       )}
 

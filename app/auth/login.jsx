@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Animated, KeyboardAvoidingView, Platform } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Animated, KeyboardAvoidingView, Platform, ScrollView } from "react-native";
 import { useAuth } from "../../context/AuthContext";
 import { Link, useLocalSearchParams, useRouter } from "expo-router";
 
@@ -38,7 +38,11 @@ export default function LoginScreen() {
 
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
-      <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
+      <Animated.ScrollView 
+        style={{ flex: 1, backgroundColor: '#fff', opacity: fadeAnim }} 
+        contentContainerStyle={[styles.container, { flexGrow: 1 }]}
+        keyboardShouldPersistTaps="handled"
+      >
         <Text style={styles.title}>FindMyProf</Text>
         <Text style={styles.subtitle}>Sign in to continue</Text>
 
@@ -92,7 +96,7 @@ export default function LoginScreen() {
             <TouchableOpacity><Text style={styles.link}>New faculty? Sign up</Text></TouchableOpacity>
           </Link>
         </View>
-      </Animated.View>
+      </Animated.ScrollView>
     </KeyboardAvoidingView>
   );
 }
