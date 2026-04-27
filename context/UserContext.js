@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from './AuthContext';
 import { getFacultyByEmail, updateFacultyProfile } from '../services/facultyService';
 import { firestore } from '../services/firebase';
-import { collection, query, where, getDocs, doc, updateDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, getDoc, updateDoc } from 'firebase/firestore';
 
 const UserContext = createContext();
 
@@ -27,11 +27,9 @@ export const UserProvider = ({ children }) => {
       if (role === 'faculty') {
         fetchedProfile = await getFacultyByEmail(user.email);
       } else if (role === 'student') {
-        const studentsRef = collection(firestore, 'students');
-        const q = query(studentsRef, where("email", "==", user.email));
-        const snapshot = await getDocs(q);
-        if (!snapshot.empty) {
-          const docSnap = snapshot.docs[0];
+        // Fetch directly by UID — document was stored with user.uid as the key
+        const docSnap = await getDoc(doc(firestore, 'students', user.uid));
+        if (docSnap.exists()) {
           fetchedProfile = { id: docSnap.id, ...docSnap.data() };
         }
       }
