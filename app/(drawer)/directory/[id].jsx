@@ -114,7 +114,15 @@ export default function DirectoryDetail() {
   };
 
   const navigateToChat = () => {
-    router.push(`/messages/index`); 
+    const chatId = `${faculty.id}_${user.uid}`;
+    router.push({
+      pathname: `/messages/${chatId}`,
+      params: { 
+        facultyId: faculty.id, 
+        studentId: user.uid, 
+        displayName: faculty.name 
+      }
+    });
   };
 
   if (loading) {

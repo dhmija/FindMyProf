@@ -119,7 +119,8 @@ export default function DrawerLayout() {
         name="messages/[chatId]" 
         options={{ 
           drawerLabel: 'Chat', 
-          drawerItemStyle: { display: 'none' } 
+          drawerItemStyle: { display: 'none' },
+          headerTitle: 'Direct Message',
         }} 
       />
     </Drawer>
