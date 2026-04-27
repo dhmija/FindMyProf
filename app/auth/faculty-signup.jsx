@@ -5,10 +5,11 @@ import { signUp } from "../../services/authService";
 import { claimFacultyProfile, updateFacultyProfile, getFacultyByEmail } from "../../services/facultyService";
 import { setDoc, doc } from "firebase/firestore";
 import { firestore } from "../../services/firebase";
-import { Link } from "expo-router";
+import { Link, useRouter } from "expo-router";
 
 export default function FacultySignupScreen() {
   const { setSessionRole } = useAuth();
+  const router = useRouter();
   
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -85,9 +86,12 @@ export default function FacultySignupScreen() {
       
       // 4. Persist Role (Redirects mapping dynamically from root config layout)
       await setSessionRole("faculty");
+      router.replace('/(tabs)/profile');
       
     } catch (err) {
+      console.error("Signup error:", err);
       setError(err.message || "An error occurred during registration.");
+    } finally {
       setLoading(false);
     }
   };

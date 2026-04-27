@@ -14,8 +14,10 @@ const STATUSES = [
 
 export default function ProfileTab() {
   const { user, role, logout } = useAuth();
-  const { profile, updateProfile } = useProfile();
+  const { profile, updateProfile, refreshProfile } = useProfile();
   const router = useRouter();
+
+  const [fetchTimeout, setFetchTimeout] = useState(false);
 
   // Faculty State
   const [notice, setNotice] = useState('');
@@ -28,6 +30,17 @@ export default function ProfileTab() {
       setNotice(profile.substitutionNotice);
     }
   }, [profile?.substitutionNotice]);
+
+  useEffect(() => {
+    if (user && !profile) {
+      const timer = setTimeout(() => {
+        setFetchTimeout(true);
+      }, 5000);
+      return () => clearTimeout(timer);
+    } else if (profile) {
+      setFetchTimeout(false);
+    }
+  }, [user, profile]);
 
   const showConfirmation = () => {
     confirmAnim.setValue(1);
@@ -102,6 +115,19 @@ export default function ProfileTab() {
   }
 
   if (!profile) {
+    if (fetchTimeout) {
+      return (
+        <View style={styles.centerContainer}>
+          <Text style={{ marginBottom: 16, color: '#888' }}>Taking longer than usual to load profile...</Text>
+          <TouchableOpacity style={styles.primaryBtn} onPress={refreshProfile}>
+            <Text style={styles.primaryBtnText}>Retry Loading Profile</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.outlineBtn, { marginTop: 12 }]} onPress={handleLogout}>
+            <Text style={styles.outlineBtnText}>Logout</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
     return (
       <View style={styles.centerContainer}>
         <ActivityIndicator size="large" color="#111" />
