@@ -4,10 +4,11 @@ import { useAuth } from "../../context/AuthContext";
 import { signUp } from "../../services/authService";
 import { setDoc, doc } from "firebase/firestore";
 import { firestore } from "../../services/firebase";
-import { Link } from "expo-router";
+import { Link, useRouter } from "expo-router";
 
 export default function StudentSignupScreen() {
   const { setSessionRole } = useAuth();
+  const router = useRouter();
   
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -70,14 +71,17 @@ export default function StudentSignupScreen() {
         createdAt: new Date().toISOString()
       });
       
-      // 3. Persist Role & triggers root layout automatically routing to home
+      // 3. Persist role then navigate to directory
       await setSessionRole("student");
-      
+      router.replace("/(drawer)/directory");
+
     } catch (err) {
       setError(err.message || "An error occurred during registration.");
+    } finally {
       setLoading(false);
     }
   };
+
 
   return (
     <Animated.ScrollView style={{ flex: 1, backgroundColor: '#F5F5F5', opacity: fadeAnim }} contentContainerStyle={styles.container}>

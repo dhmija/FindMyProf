@@ -53,19 +53,22 @@ export default function DirectoryDetail() {
       setLoading(false);
     });
 
-    const bookingsRef = collection(firestore, 'bookings');
-    const q = query(bookingsRef, where('facultyId', '==', id), where('status', 'in', ['pending', 'confirmed']));
-    
-    const unsubscribeBookings = onSnapshot(q, (snapshot) => {
-       const activeBookings = snapshot.docs.map(d => d.data().slot);
-       setBookedSlots(activeBookings);
-    });
+    // Only listen to bookings if the user is authenticated — rules block unauthenticated reads
+    let unsubscribeBookings = () => {};
+    if (user) {
+      const bookingsRef = collection(firestore, 'bookings');
+      const q = query(bookingsRef, where('facultyId', '==', id), where('status', 'in', ['pending', 'confirmed']));
+      unsubscribeBookings = onSnapshot(q, (snapshot) => {
+        const activeBookings = snapshot.docs.map(d => d.data().slot);
+        setBookedSlots(activeBookings);
+      });
+    }
 
     return () => {
       unsubscribeProfile();
       unsubscribeBookings();
     };
-  }, [id]);
+  }, [id, user]);
 
   const handleEmail = () => {
     if (faculty?.email) {

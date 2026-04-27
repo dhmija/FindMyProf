@@ -29,17 +29,6 @@ function RootNavigation() {
   useEffect(() => {
     if (loading || splashVisible || hasSeenOnboarding === null) return;
 
-    if (segments.length === 0 || segments.join('/') === '') {
-      if (hasSeenOnboarding !== 'true') {
-        router.replace('/onboarding');
-      } else if (!user) {
-        router.replace('/directory/index');
-      } else {
-        router.replace(`/${role}/home`);
-      }
-      return;
-    }
-
     const isProtectedStudent = segments[0] === '(drawer)' && segments[1] === 'student';
     const isProtectedFaculty = segments[0] === '(drawer)' && segments[1] === 'faculty';
     const isProtectedMessages = segments[0] === '(drawer)' && segments[1] === 'messages';
