@@ -1,15 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Animated, ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Animated, ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, Switch } from 'react-native';
 import { useAuth } from '../../context/AuthContext';
 import { useProfile } from '../../context/UserContext';
 import { useRouter } from 'expo-router';
 
-// Only status options relevant to monochrome pass
 const STATUSES = [
   { id: 'available', label: 'Available' },
-  { id: 'busy', label: 'Busy' },
   { id: 'in_class', label: 'In Class' },
-  { id: 'not_on_campus', label: 'Not on Campus' }
+  { id: 'on_leave', label: 'On Leave' },
+  { id: 'busy', label: 'Busy' }
 ];
 
 export default function ProfileTab() {
@@ -20,17 +19,38 @@ export default function ProfileTab() {
   const [fetchTimeout, setFetchTimeout] = useState(false);
 
   // Faculty State
-  const [notice, setNotice] = useState('');
+  const [statusText, setStatusText] = useState('');
+  const [phone, setPhone] = useState('');
+  const [phoneVisible, setPhoneVisible] = useState(false);
+  
+  const [locBlock, setLocBlock] = useState('');
+  const [locFloor, setLocFloor] = useState('');
+  const [locCubicle, setLocCubicle] = useState('');
+  
+  const [officeHours, setOfficeHours] = useState([]);
+  const [newOhDay, setNewOhDay] = useState('');
+  const [newOhFrom, setNewOhFrom] = useState('');
+  const [newOhTo, setNewOhTo] = useState('');
+
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
-  const [isUpdatingNotice, setIsUpdatingNotice] = useState(false);
+  const [isUpdatingText, setIsUpdatingText] = useState(false);
   const [isUpdatingMessages, setIsUpdatingMessages] = useState(false);
   const confirmAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    if (profile?.substitutionNotice) {
-      setNotice(profile.substitutionNotice);
+    if (profile) {
+      if (profile.statusText !== undefined) setStatusText(profile.statusText);
+      if (profile.substitutionNotice !== undefined && profile.statusText === undefined) setStatusText(profile.substitutionNotice);
+      if (profile.phone !== undefined) setPhone(profile.phone);
+      if (profile.phoneVisible !== undefined) setPhoneVisible(profile.phoneVisible);
+      if (profile.location) {
+        setLocBlock(profile.location.block || '');
+        setLocFloor(profile.location.floor?.toString() || '');
+        setLocCubicle(profile.location.cubicle || '');
+      }
+      if (profile.officeHours) setOfficeHours(profile.officeHours);
     }
-  }, [profile?.substitutionNotice]);
+  }, [profile]);
 
   useEffect(() => {
     if (user && !profile) {
@@ -54,10 +74,11 @@ export default function ProfileTab() {
   };
 
   const handleStatusUpdate = async (newStatus) => {
-    if (profile?.status === newStatus || isUpdatingStatus) return;
+    const targetStatus = profile?.status === newStatus ? null : newStatus;
+    if (isUpdatingStatus) return;
     setIsUpdatingStatus(true);
     try {
-      await updateProfile({ status: newStatus });
+      await updateProfile({ status: targetStatus });
       showConfirmation();
     } catch (e) {
       alert("Failed to update status.");
@@ -66,27 +87,60 @@ export default function ProfileTab() {
     }
   };
 
-  const handleSetNotice = async () => {
-    setIsUpdatingNotice(true);
+  const handlePhoneSave = async () => {
     try {
-      await updateProfile({ substitutionNotice: notice.trim() || null });
-      alert("Notice updated successfully!");
+      await updateProfile({ phone, phoneVisible });
+      showConfirmation();
     } catch (e) {
-      alert("Failed to update notice.");
-    } finally {
-      setIsUpdatingNotice(false);
+      alert("Failed to save phone tracking.");
     }
   };
 
-  const handleClearNotice = async () => {
-    setIsUpdatingNotice(true);
+  const handleLocationSave = async () => {
     try {
-      setNotice('');
-      await updateProfile({ substitutionNotice: null });
+      await updateProfile({ location: { block: locBlock, floor: locFloor, cubicle: locCubicle } });
+      showConfirmation();
     } catch (e) {
-      alert("Failed to clear notice.");
+      alert("Failed to save location.");
+    }
+  };
+
+  const handleTextSave = async (explicitText) => {
+    const textToSave = explicitText !== undefined ? explicitText : statusText;
+    setIsUpdatingText(true);
+    try {
+      await updateProfile({ statusText: textToSave.trim() || null });
+      if (explicitText !== undefined) setStatusText(explicitText);
+      showConfirmation();
+    } catch (e) {
+      alert("Failed to update notice.");
     } finally {
-      setIsUpdatingNotice(false);
+      setIsUpdatingText(false);
+    }
+  };
+
+  const handleAddOfficeHour = async () => {
+    if (!newOhDay.trim() || !newOhFrom.trim() || !newOhTo.trim()) return;
+    try {
+      const newSlot = { day: newOhDay, from: newOhFrom, to: newOhTo };
+      const updatedArray = [...officeHours, newSlot];
+      await updateProfile({ officeHours: updatedArray });
+      setOfficeHours(updatedArray);
+      setNewOhDay(''); setNewOhFrom(''); setNewOhTo('');
+      showConfirmation();
+    } catch (e) {
+      alert("Failed to add office hour.");
+    }
+  };
+
+  const handleDeleteOfficeHour = async (idxToDel) => {
+    try {
+      const updatedArray = officeHours.filter((_, idx) => idx !== idxToDel);
+      await updateProfile({ officeHours: updatedArray });
+      setOfficeHours(updatedArray);
+      showConfirmation();
+    } catch (e) {
+      alert("Failed to remove slot.");
     }
   };
 
@@ -176,31 +230,81 @@ export default function ProfileTab() {
           <Text style={styles.greeting}>Faculty Dashboard</Text>
           <Text style={styles.name}>{profile.name}</Text>
           <Text style={styles.meta}>{profile.department}</Text>
+          <Text style={styles.staticEmail}>{user.email}</Text>
         </View>
 
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>MESSAGE SETTINGS</Text>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-            <Text style={{ fontSize: 15, fontWeight: '600', color: '#111' }}>Accept Direct Messages</Text>
-            <TouchableOpacity 
-              style={[
-                { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, borderWidth: 1 }, 
-                profile.acceptsMessages ? { backgroundColor: '#111', borderColor: '#111' } : { backgroundColor: '#f1f1f1', borderColor: '#e5e5e5' }
-              ]} 
-              onPress={handleToggleMessages}
-              disabled={isUpdatingMessages}
-            >
-              <Text style={[
-                { fontSize: 13, fontWeight: '600' },
-                profile.acceptsMessages ? { color: '#fff' } : { color: '#888' }
-              ]}>
-                {profile.acceptsMessages ? 'Enabled' : 'Disabled'}
-              </Text>
-            </TouchableOpacity>
+          <Text style={styles.cardTitle}>PHONE NUMBER</Text>
+          <View style={styles.inputRow}>
+            <TextInput 
+              style={[styles.inputField, {flex: 1}]}
+              placeholder="e.g. 555-0199"
+              keyboardType="number-pad"
+              value={phone}
+              onChangeText={setPhone}
+            />
+            {(phone !== (profile.phone || '') || phoneVisible !== !!profile.phoneVisible) && (
+              <TouchableOpacity style={styles.inlineActionBtn} onPress={handlePhoneSave}>
+                <Text style={styles.inlineActionText}>Save</Text>
+              </TouchableOpacity>
+            )}
           </View>
-          <Text style={styles.cardSubtitle}>
-            When disabled, students can notify you they are heading to your office but cannot chat.
-          </Text>
+          <View style={styles.toggleRow}>
+            <Text style={styles.toggleLabel}>Show phone on profile</Text>
+            <Switch 
+              value={phoneVisible} 
+              onValueChange={setPhoneVisible}
+              trackColor={{ false: '#e5e5e5', true: '#111' }}
+              thumbColor={'#fff'}
+            />
+          </View>
+        </View>
+
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>OFFICE LOCATION</Text>
+          <Text style={styles.cardSubtitle}>Block Select</Text>
+          <View style={styles.gridRow}>
+            {['M', 'N1', 'N2'].map((b) => (
+              <TouchableOpacity
+                key={b}
+                style={[styles.segmentBtn, locBlock === b && styles.segmentBtnActive]}
+                onPress={() => setLocBlock(b)}
+              >
+                <Text style={[styles.segmentBtnText, locBlock === b && styles.segmentBtnTextActive]}>{b}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          {locBlock === 'M' && (
+            <>
+              <Text style={styles.cardSubtitle}>Floor Select</Text>
+              <View style={styles.gridRow}>
+                {['1', '2', '3'].map((f) => (
+                  <TouchableOpacity
+                    key={f}
+                    style={[styles.segmentBtn, locFloor === f && styles.segmentBtnActive]}
+                    onPress={() => setLocFloor(f)}
+                  >
+                    <Text style={[styles.segmentBtnText, locFloor === f && styles.segmentBtnTextActive]}>Floor {f}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </>
+          )}
+
+          <Text style={styles.cardSubtitle}>Cubicle/Room Number</Text>
+          <TextInput 
+            style={styles.inputField}
+            placeholder="e.g. C-45"
+            value={locCubicle}
+            onChangeText={setLocCubicle}
+          />
+
+          {(locBlock !== (profile.location?.block || '') || locFloor !== (profile.location?.floor || '') || locCubicle !== (profile.location?.cubicle || '')) && (
+            <TouchableOpacity style={[styles.primaryBtn, {marginTop: 12}]} onPress={handleLocationSave}>
+              <Text style={styles.primaryBtnText}>Save Location</Text>
+            </TouchableOpacity>
+          )}
         </View>
 
         <View style={styles.card}>
@@ -223,37 +327,51 @@ export default function ProfileTab() {
               );
             })}
           </View>
-          
-          <Animated.Text style={[styles.successText, { opacity: confirmAnim }]}>
-            ✓ Status updated
-          </Animated.Text>
         </View>
 
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>SUBSTITUTION NOTICE</Text>
-          <Text style={styles.cardSubtitle}>Broadcast a temporary notice to students viewing your profile.</Text>
-          
-          <TextInput
-            style={styles.inputArea}
-            multiline
-            numberOfLines={3}
-            placeholder="e.g. Taking leave for 3 days."
-            value={notice}
-            onChangeText={setNotice}
-          />
-          
-          <View style={styles.actionRow}>
-            {profile.substitutionNotice ? (
-              <TouchableOpacity style={styles.clearBtn} onPress={handleClearNotice} disabled={isUpdatingNotice}>
-                <Text style={styles.clearBtnText}>Clear Notice</Text>
-              </TouchableOpacity>
-            ) : <View style={{ flex: 1 }} />}
-            
-            <TouchableOpacity style={styles.saveBtn} onPress={handleSetNotice} disabled={isUpdatingNotice || notice.trim() === ''}>
-              {isUpdatingNotice ? <ActivityIndicator size="small" color="#fff" /> : <Text style={styles.saveBtnText}>Publish Notice</Text>}
-            </TouchableOpacity>
+          <Text style={styles.cardTitle}>OFFICE HOURS</Text>
+          {officeHours.map((oh, idx) => (
+            <View key={idx} style={styles.ohCard}>
+               <View>
+                 <Text style={styles.ohDay}>{oh.day}</Text>
+                 <Text style={styles.ohTime}>{oh.from} - {oh.to}</Text>
+               </View>
+               <TouchableOpacity onPress={() => handleDeleteOfficeHour(idx)}>
+                  <Text style={styles.delText}>Delete</Text>
+               </TouchableOpacity>
+            </View>
+          ))}
+          <View style={styles.ohInputRow}>
+            <TextInput style={[styles.inputField, {flex: 2, marginRight: 8}]} placeholder="Day (e.g. Mon)" value={newOhDay} onChangeText={setNewOhDay} />
+            <TextInput style={[styles.inputField, {flex: 1.5, marginRight: 8}]} placeholder="From" value={newOhFrom} onChangeText={setNewOhFrom} />
+            <TextInput style={[styles.inputField, {flex: 1.5}]} placeholder="To" value={newOhTo} onChangeText={setNewOhTo} />
           </View>
+          <TouchableOpacity style={[styles.outlineBtn, {marginTop: 12}]} onPress={handleAddOfficeHour}>
+             <Text style={styles.outlineBtnText}>+ Add Slot</Text>
+          </TouchableOpacity>
         </View>
+
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>MESSAGE SETTINGS</Text>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+            <Text style={{ fontSize: 14, fontWeight: '600', color: '#111' }}>Accept Direct Messages</Text>
+            <Switch 
+              value={profile.acceptsMessages} 
+              onValueChange={handleToggleMessages}
+              disabled={isUpdatingMessages}
+              trackColor={{ false: '#e5e5e5', true: '#111' }}
+              thumbColor={'#fff'}
+            />
+          </View>
+          <Text style={styles.cardSubtitle}>
+            When disabled, students can notify you they are heading to your office but cannot chat.
+          </Text>
+        </View>
+
+        <Animated.Text style={[styles.floatingSuccess, { opacity: confirmAnim }]}>
+           Saved successfully
+        </Animated.Text>
 
         <View style={styles.card}>
           <TouchableOpacity style={[styles.primaryBtn, {marginTop: 10}]} onPress={handleLogout}>
@@ -392,53 +510,125 @@ const styles = StyleSheet.create({
   statusBtnTextActive: {
     color: '#fff',
   },
-  successText: {
-    color: '#555',
-    fontSize: 12,
+  staticEmail: {
+    fontSize: 13,
+    color: '#888',
+    marginTop: 2,
     fontWeight: '500',
-    textAlign: 'center',
-    marginTop: 8,
   },
-  inputArea: {
+  inputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  inputField: {
+    backgroundColor: '#FAFAFA',
     borderWidth: 1,
-    borderColor: '#e5e5e5',
-    borderRadius: 6,
-    padding: 12,
+    borderColor: '#EAEAEA',
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     fontSize: 14,
-    minHeight: 80,
-    textAlignVertical: 'top',
-    marginBottom: 16,
     color: '#333',
   },
-  actionRow: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    gap: 8,
-  },
-  saveBtn: {
+  inlineActionBtn: {
     backgroundColor: '#111',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    borderRadius: 6,
-    minWidth: 100,
-    alignItems: 'center',
+    borderRadius: 8,
+    marginLeft: 8,
+    justifyContent: 'center',
   },
-  saveBtnText: {
+  inlineActionText: {
     color: '#fff',
-    fontWeight: '600',
+    fontWeight: 'bold',
     fontSize: 13,
   },
-  clearBtn: {
-    borderWidth: 1,
-    borderColor: '#e5e5e5',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 6,
+  toggleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
+    marginTop: 8,
   },
-  clearBtnText: {
-    color: '#666',
+  toggleLabel: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#555',
+  },
+  gridRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 16,
+  },
+  segmentBtn: {
+    flex: 1,
+    paddingVertical: 12,
+    borderWidth: 1,
+    borderColor: '#EAEAEA',
+    borderRadius: 8,
+    alignItems: 'center',
+    backgroundColor: '#FAFAFA',
+  },
+  segmentBtnActive: {
+    backgroundColor: '#111',
+    borderColor: '#111',
+  },
+  segmentBtnText: {
+    color: '#888',
     fontWeight: '600',
     fontSize: 13,
+  },
+  segmentBtnTextActive: {
+    color: '#fff',
+  },
+  chipBtn: {
+    backgroundColor: '#FAFAFA',
+    borderWidth: 1,
+    borderColor: '#EAEAEA',
+    borderRadius: 16,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    marginRight: 8,
+  },
+  chipText: {
+    color: '#555',
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  ohCard: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#FAFAFA',
+    borderWidth: 1,
+    borderColor: '#EAEAEA',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 8,
+  },
+  ohDay: {
+    fontWeight: 'bold',
+    color: '#333',
+    fontSize: 14,
+  },
+  ohTime: {
+    color: '#666',
+    fontSize: 13,
+    marginTop: 2,
+  },
+  delText: {
+    color: '#D8000C',
+    fontWeight: 'bold',
+    fontSize: 12,
+  },
+  ohInputRow: {
+    flexDirection: 'row',
+    marginTop: 8,
+  },
+  floatingSuccess: {
+    textAlign: 'center',
+    color: '#111',
+    fontWeight: 'bold',
+    marginVertical: 16,
   }
 });

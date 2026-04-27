@@ -14,8 +14,8 @@ export const UserProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   const fetchProfile = async () => {
-    // If auth is still resolving or user unauthenticated, don't fetch
-    if (!user || !role) {
+    // If auth is still resolving, user unauthenticated, or fake-envelope is missing email, don't fetch
+    if (!user || !role || (role === 'faculty' && !user.email)) {
       setProfile(null);
       setLoading(authLoading);
       return;

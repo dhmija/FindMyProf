@@ -204,9 +204,9 @@ export default function DirectoryDetail() {
         )}
 
         {/* Notices */}
-        {faculty.isRegistered && faculty.substitutionNotice ? (
+        {faculty.isRegistered && (faculty.statusText || faculty.substitutionNotice) ? (
           <View style={styles.noticeBanner}>
-            <Text style={styles.noticeText}>⚠️ Notice: {faculty.substitutionNotice}</Text>
+            <Text style={styles.noticeText}>⚠️ Status: {faculty.statusText || faculty.substitutionNotice}</Text>
           </View>
         ) : null}
 
@@ -215,15 +215,21 @@ export default function DirectoryDetail() {
            <View style={styles.infoRow}>
             <Text style={styles.label}>Location</Text>
             <Text style={styles.value}>
-              {faculty.block === 'M'
-                ? `M Block · Floor ${faculty.floor} · Cubicle ${faculty.cubicle}`
-                : `${faculty.block} Block · Cubicle ${faculty.cubicle}`}
+              {(faculty.location?.block || faculty.block) === 'M'
+                ? `M Block · Floor ${faculty.location?.floor || faculty.floor || '1'} · Cubicle ${faculty.location?.cubicle || faculty.cubicle || 'N/A'}`
+                : `${faculty.location?.block || faculty.block || 'Unknown'} Block · Cubicle ${faculty.location?.cubicle || faculty.cubicle || 'N/A'}`}
             </Text>
           </View>
           <View style={styles.infoRow}>
             <Text style={styles.label}>Email</Text>
             <Text style={styles.value}>{faculty.email}</Text>
           </View>
+          {faculty.phoneVisible && faculty.phone ? (
+            <View style={styles.infoRow}>
+              <Text style={styles.label}>Phone</Text>
+              <Text style={styles.value}>{faculty.phone}</Text>
+            </View>
+          ) : null}
         </View>
 
         {/* Registered Additions */}
@@ -233,13 +239,14 @@ export default function DirectoryDetail() {
             <View style={styles.card}>
               <Text style={styles.cardTitle}>Office Hours Bookings</Text>
               {faculty.officeHours && faculty.officeHours.length > 0 ? (
-                faculty.officeHours.map((slot, index) => {
-                  const isBooked = bookedSlots.includes(slot);
-                  const isLoading = bookingLoading === slot;
+                faculty.officeHours.map((slotData, index) => {
+                  const slotStr = typeof slotData === 'string' ? slotData : `${slotData.day} · ${slotData.from} - ${slotData.to}`;
+                  const isBooked = bookedSlots.includes(slotStr);
+                  const isLoading = bookingLoading === slotStr;
                   
                   return (
                     <View key={index} style={styles.slotRow}>
-                      <Text style={[styles.slotText, isBooked && styles.slotTextMuted]}>• {slot}</Text>
+                      <Text style={[styles.slotText, isBooked && styles.slotTextMuted]}>• {slotStr}</Text>
                       {isBooked ? (
                         <View style={styles.bookedBadge}>
                            <Text style={styles.bookedText}>Unavailable</Text>
@@ -249,7 +256,7 @@ export default function DirectoryDetail() {
                           <TouchableOpacity 
                             style={styles.bookButton} 
                             disabled={isLoading} 
-                            onPress={() => handleAuthGate("Login required to secure an office hours slot.", () => handleBookSlot(slot))}
+                            onPress={() => handleAuthGate("Login required to secure an office hours slot.", () => handleBookSlot(slotStr))}
                           >
                             {isLoading ? <ActivityIndicator color="#fff" size="small" /> : <Text style={styles.bookText}>Book Slot</Text>}
                           </TouchableOpacity>
