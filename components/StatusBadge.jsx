@@ -1,13 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Animated, Text, StyleSheet } from 'react-native';
-
-const STATUS_COLORS = {
-  available: '#4CAF50',
-  busy: '#F44336',
-  in_class: '#FFC107',
-  not_on_campus: '#9E9E9E',
-  unknown: '#9E9E9E',
-};
+import React from 'react';
+import { View, Text, StyleSheet } from 'react-native';
 
 const STATUS_LABELS = {
   available: 'Available',
@@ -17,56 +9,44 @@ const STATUS_LABELS = {
   unknown: 'Unknown',
 };
 
+const getStatusStyle = (status) => {
+  switch (status) {
+    case 'available':
+      return { bg: '#111', text: '#fff', border: '#111' };
+    case 'busy':
+      return { bg: '#fff', text: '#111', border: '#111' };
+    case 'in_class':
+    case 'not_on_campus':
+      return { bg: '#f0f0f0', text: '#555', border: '#f0f0f0' };
+    case 'unknown':
+    default:
+      return { bg: '#e5e5e5', text: '#888', border: '#e5e5e5' };
+  }
+};
+
 export default function StatusBadge({ status }) {
   const normalizedStatus = status || 'unknown';
-  
-  const colorAnim = useRef(new Animated.Value(0)).current;
-  const [prevColor, setPrevColor] = useState(STATUS_COLORS[normalizedStatus]);
-  const [currColor, setCurrColor] = useState(STATUS_COLORS[normalizedStatus]);
-
-  useEffect(() => {
-    const newColor = STATUS_COLORS[normalizedStatus] || STATUS_COLORS.unknown;
-    
-    if (newColor !== currColor) {
-      setPrevColor(currColor);
-      setCurrColor(newColor);
-      
-      colorAnim.setValue(0);
-      Animated.timing(colorAnim, {
-        toValue: 1,
-        duration: 600,
-        useNativeDriver: false, // Color interpolation requires JS thread
-      }).start();
-    }
-  }, [normalizedStatus]);
-
-  const animatedBackgroundColor = colorAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [prevColor, currColor]
-  });
+  const theme = getStatusStyle(normalizedStatus);
 
   return (
-    <Animated.View style={[styles.badge, { backgroundColor: animatedBackgroundColor }]}>
-      <Text style={styles.text}>{STATUS_LABELS[normalizedStatus] || STATUS_LABELS.unknown}</Text>
-    </Animated.View>
+    <View style={[styles.badge, { backgroundColor: theme.bg, borderColor: theme.border }]}>
+      <Text style={[styles.text, { color: theme.text }]}>
+        {STATUS_LABELS[normalizedStatus] || STATUS_LABELS.unknown}
+      </Text>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   badge: {
     paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
+    paddingVertical: 4,
+    borderRadius: 20,
+    borderWidth: 1,
     alignSelf: 'flex-start',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
   },
   text: {
-    color: '#FFF',
-    fontWeight: 'bold',
+    fontWeight: '700',
     fontSize: 12,
   }
 });

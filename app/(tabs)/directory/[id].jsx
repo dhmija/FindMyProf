@@ -198,7 +198,7 @@ export default function DirectoryDetail() {
               onPress={() => handleAuthGate("Login required to notify the faculty that you're heading over.", handleQuickNotify)}
               disabled={notifyLoading}
             >
-              {notifyLoading ? <ActivityIndicator color="#fff" size="small"/> : <Text style={[styles.actionButtonText, { color: '#fff' }]}>I'm heading to your office</Text>}
+              {notifyLoading ? <ActivityIndicator color="#111" size="small"/> : <Text style={[styles.actionButtonText, { color: '#111' }]}>I'm heading to your office</Text>}
             </TouchableOpacity>
           </View>
         )}
@@ -387,23 +387,27 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   actionRow: {
-    flexDirection: 'row',
-    marginBottom: 12,
+    flexDirection: 'column',
+    marginBottom: 16,
     gap: 8,
   },
   actionButton: {
-    flex: 1,
-    paddingVertical: 13,
-    borderRadius: 6,
+    height: 48,
+    borderRadius: 8,
+    justifyContent: 'center',
     alignItems: 'center',
+  },
+  actionButtonText: {
+    fontWeight: '700',
+    fontSize: 14,
   },
   msgButton: {
     backgroundColor: '#111',
   },
   notifyButton: {
-    backgroundColor: '#111',
+    backgroundColor: 'transparent',
     borderWidth: 1,
-    borderColor: '#333',
+    borderColor: '#111',
   },
   // Notices
   noticeBanner: {
