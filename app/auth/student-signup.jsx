@@ -73,7 +73,7 @@ export default function StudentSignupScreen() {
       
       // 3. Persist role then navigate to directory
       await setSessionRole("student");
-      router.replace("/(drawer)/directory");
+      router.replace("/(tabs)/directory");
 
     } catch (err) {
       setError(err.message || "An error occurred during registration.");

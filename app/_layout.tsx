@@ -26,19 +26,7 @@ function RootNavigation() {
     return () => clearTimeout(timer);
   }, []);
 
-  useEffect(() => {
-    if (loading || splashVisible || hasSeenOnboarding === null) return;
-
-    const isProtectedStudent = segments[0] === '(drawer)' && segments[1] === 'student';
-    const isProtectedFaculty = segments[0] === '(drawer)' && segments[1] === 'faculty';
-    const isProtectedMessages = segments[0] === '(drawer)' && segments[1] === 'messages';
-    const isProtectedOffice = segments[0] === '(drawer)' && segments[1] === 'office-hours';
-    const isProtected = isProtectedStudent || isProtectedFaculty || isProtectedMessages || isProtectedOffice;
-
-    if (!user && isProtected) {
-      router.replace('/auth/login');
-    }
-  }, [user, role, loading, splashVisible, segments, hasSeenOnboarding]);
+  // Auth protection routing removed as it is now handled by tab listeners and AuthGateSheet.
 
   if (loading || splashVisible) {
     return (
