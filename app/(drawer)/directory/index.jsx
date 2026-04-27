@@ -11,7 +11,7 @@ export default function DirectoryIndex() {
   const [faculties, setFaculties] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchText, setSearchText] = useState('');
-  
+
   const [filterBlock, setFilterBlock] = useState('All');
   const [filterFloor, setFilterFloor] = useState(null);
 
@@ -20,9 +20,8 @@ export default function DirectoryIndex() {
       const cached = await AsyncStorage.getItem('@faculties_cache');
       if (cached) {
         setFaculties(JSON.parse(cached));
-        setLoading(false); // Render cache immediately
+        setLoading(false);
       }
-
       const freshData = await getAllFaculties();
       setFaculties(freshData);
       await AsyncStorage.setItem('@faculties_cache', JSON.stringify(freshData));
@@ -33,60 +32,44 @@ export default function DirectoryIndex() {
     }
   }, []);
 
-  useEffect(() => {
-    fetchFaculties();
-  }, [fetchFaculties]);
+  useEffect(() => { fetchFaculties(); }, [fetchFaculties]);
 
-  const handleSearchChange = useCallback((text) => {
-    setSearchText(text);
-  }, []);
+  const handleSearchChange = useCallback((text) => setSearchText(text), []);
 
   const handleBlockChange = useCallback((block) => {
     setFilterBlock(block);
-    // Reset floor filter when switching to a block that has no floors
-    if (block !== 'M') {
-      setFilterFloor(null);
-    }
+    if (block !== 'M') setFilterFloor(null);
   }, []);
 
   const handleFloorChange = useCallback((floor) => {
-    setFilterFloor(floor);
+    setFilterFloor(prev => prev === floor ? null : floor);
   }, []);
 
   const filteredFaculties = useMemo(() => {
     return faculties.filter(f => {
       const query = searchText.toLowerCase();
-      const matchesSearch = query === '' || 
-        f.name?.toLowerCase().includes(query) || 
+      const matchesSearch = query === '' ||
+        f.name?.toLowerCase().includes(query) ||
         f.department?.toLowerCase().includes(query) ||
         (Array.isArray(f.subjects) && f.subjects.some(s => s.toLowerCase().includes(query)));
-        
       const matchesBlock = filterBlock === 'All' || f.block === filterBlock;
       const matchesFloor = filterFloor === null || f.floor?.toString() === filterFloor;
-      
       return matchesSearch && matchesBlock && matchesFloor;
     });
   }, [faculties, searchText, filterBlock, filterFloor]);
 
-  const renderItem = useCallback(({ item }) => (
-    <FacultyCard faculty={item} />
-  ), []);
-
-  const getItemLayout = useCallback((data, index) => (
-    // Assuming card height + margins averages out to about 130px statically.
-    // This dramatically improves large list memory rendering.
-    { length: 130, offset: 130 * index, index }
-  ), []);
-
+  const renderItem = useCallback(({ item }) => <FacultyCard faculty={item} />, []);
+  const getItemLayout = useCallback((_, index) => ({ length: 73, offset: 73 * index, index }), []);
   const keyExtractor = useCallback((item) => item.id, []);
 
   return (
     <View style={styles.container}>
-      {/* Search Bar */}
-      <View style={styles.searchContainer}>
+      {/* Search */}
+      <View style={styles.searchRow}>
         <TextInput
           style={styles.searchInput}
-          placeholder="Search by name, department, subject..."
+          placeholder="Search name, department, subject…"
+          placeholderTextColor="#bbb"
           value={searchText}
           onChangeText={handleSearchChange}
           returnKeyType="search"
@@ -94,44 +77,44 @@ export default function DirectoryIndex() {
         />
       </View>
 
-      {/* Filter Chips */}
-      <View style={styles.filtersWrapper}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filtersContainer}>
-          <Text style={styles.filterLabel}>Block:</Text>
-          {BLOCKS.map(block => (
-            <TouchableOpacity 
-              key={`block-${block}`} 
-              style={[styles.chip, filterBlock === block && styles.chipActive]}
-              onPress={() => handleBlockChange(block)}
-            >
-              <Text style={[styles.chipText, filterBlock === block && styles.chipActiveText]}>{block}</Text>
-            </TouchableOpacity>
-          ))}
-          
-          {filterBlock === 'M' && (
-            <>
-              <View style={styles.filterDivider} />
-              
-              <Text style={styles.filterLabel}>Floor:</Text>
-              {FLOORS.map(floor => (
-                <TouchableOpacity 
-                  key={`floor-${floor}`} 
-                  style={[styles.chip, filterFloor === floor && styles.chipActive]}
-                  onPress={() => handleFloorChange(floor)}
-                >
-                  <Text style={[styles.chipText, filterFloor === floor && styles.chipActiveText]}>{floor}</Text>
-                </TouchableOpacity>
-              ))}
-            </>
-          )}
-        </ScrollView>
+      {/* Block filter */}
+      <View style={styles.filterRow}>
+        {BLOCKS.map(block => (
+          <TouchableOpacity
+            key={block}
+            style={[styles.pill, filterBlock === block && styles.pillActive]}
+            onPress={() => handleBlockChange(block)}
+          >
+            <Text style={[styles.pillText, filterBlock === block && styles.pillTextActive]}>
+              {block}
+            </Text>
+          </TouchableOpacity>
+        ))}
       </View>
 
-      {/* List content */}
+      {/* Floor filter — only for M Block */}
+      {filterBlock === 'M' && (
+        <View style={styles.filterRow}>
+          {FLOORS.map(floor => (
+            <TouchableOpacity
+              key={floor}
+              style={[styles.pillSmall, filterFloor === floor && styles.pillActive]}
+              onPress={() => handleFloorChange(floor)}
+            >
+              <Text style={[styles.pillSmallText, filterFloor === floor && styles.pillTextActive]}>
+                Floor {floor}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
+
+      <View style={styles.divider} />
+
       {loading && faculties.length === 0 ? (
-        <View style={styles.centerContainer}>
-          <ActivityIndicator size="large" color="#1E90FF" />
-          <Text style={styles.loadingText}>Fetching Directory...</Text>
+        <View style={styles.center}>
+          <ActivityIndicator size="large" color="#111" />
+          <Text style={styles.loadingText}>Loading directory…</Text>
         </View>
       ) : (
         <FlatList
@@ -139,14 +122,14 @@ export default function DirectoryIndex() {
           renderItem={renderItem}
           keyExtractor={keyExtractor}
           getItemLayout={getItemLayout}
-          initialNumToRender={10}
-          maxToRenderPerBatch={10}
+          initialNumToRender={12}
+          maxToRenderPerBatch={12}
           windowSize={5}
           removeClippedSubviews={true}
           contentContainerStyle={styles.listContent}
           ListEmptyComponent={
-            <View style={styles.centerContainer}>
-              <Text style={styles.emptyText}>No faculty members found matching your search.</Text>
+            <View style={styles.center}>
+              <Text style={styles.emptyText}>No results found.</Text>
             </View>
           }
         />
@@ -158,81 +141,80 @@ export default function DirectoryIndex() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FAFAFA',
+    backgroundColor: '#fff',
   },
-  centerContainer: {
+  searchRow: {
+    paddingHorizontal: 16,
+    paddingTop: 14,
+    paddingBottom: 10,
+  },
+  searchInput: {
+    fontSize: 15,
+    color: '#111',
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    borderRadius: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    backgroundColor: '#fff',
+  },
+  filterRow: {
+    flexDirection: 'row',
+    paddingHorizontal: 16,
+    paddingBottom: 10,
+    gap: 6,
+  },
+  pill: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#d0d0d0',
+  },
+  pillActive: {
+    backgroundColor: '#111',
+    borderColor: '#111',
+  },
+  pillText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#555',
+  },
+  pillTextActive: {
+    color: '#fff',
+  },
+  pillSmall: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#d0d0d0',
+  },
+  pillSmallText: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#666',
+  },
+  divider: {
+    height: 1,
+    backgroundColor: '#f0f0f0',
+  },
+  center: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 40,
+    marginTop: 60,
   },
   loadingText: {
     marginTop: 12,
-    color: '#666',
+    fontSize: 13,
+    color: '#aaa',
   },
   emptyText: {
-    textAlign: 'center',
-    color: '#999',
-    padding: 24,
-  },
-  searchContainer: {
-    paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 8,
-    backgroundColor: '#fff',
-  },
-  searchInput: {
-    backgroundColor: '#F5F5F5',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 8,
-    fontSize: 16,
-    borderWidth: 1,
-    borderColor: '#E0E0E0',
-  },
-  filtersWrapper: {
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E0E0E0',
-    paddingBottom: 12,
-  },
-  filtersContainer: {
-    paddingHorizontal: 16,
-    alignItems: 'center',
-    flexDirection: 'row',
-  },
-  filterLabel: {
-    fontSize: 13,
-    color: '#666',
-    fontWeight: '600',
-    marginRight: 8,
-  },
-  filterDivider: {
-    width: 1,
-    height: 20,
-    backgroundColor: '#D0D0D0',
-    marginHorizontal: 12,
-  },
-  chip: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    backgroundColor: '#F0F0F0',
-    borderRadius: 16,
-    marginRight: 6,
-  },
-  chipActive: {
-    backgroundColor: '#1E90FF',
-  },
-  chipText: {
-    fontSize: 13,
-    color: '#555',
-    fontWeight: '500',
-  },
-  chipActiveText: {
-    color: '#fff',
+    fontSize: 14,
+    color: '#bbb',
   },
   listContent: {
-    paddingTop: 16,
     paddingBottom: 40,
-  }
+  },
 });

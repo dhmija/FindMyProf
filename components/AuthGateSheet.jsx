@@ -59,45 +59,37 @@ export default function AuthGateSheet({ visible, onClose, actionMessage, returnT
       
       <Animated.View style={[styles.sheetContainer, { transform: [{ translateY: slideAnim }] }]}>
         <View style={styles.handleBar} />
-        
+
         <View style={styles.header}>
-            <Text style={styles.title}>Login Required</Text>
-            <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
-              <Text style={styles.closeBtnText}>✕</Text>
-            </TouchableOpacity>
+          <Text style={styles.title}>Login Required</Text>
+          <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
+            <Text style={styles.closeBtnText}>✕</Text>
+          </TouchableOpacity>
         </View>
 
         <Text style={styles.message}>{actionMessage || "Authentication is required to perform this action."}</Text>
 
-        <TouchableOpacity 
-          style={[styles.btn, styles.loginBtn]} 
+        <TouchableOpacity
+          style={styles.loginBtn}
           onPress={() => handleNavigate('/auth/login')}
         >
-          <Text style={styles.loginBtnText}>Login to Continue</Text>
+          <Text style={styles.loginBtnText}>Login</Text>
         </TouchableOpacity>
-        
-        <View style={styles.divider}>
-           <View style={styles.line}/>
-           <Text style={styles.or}>OR</Text>
-           <View style={styles.line}/>
-        </View>
 
-        <View style={styles.row}>
-           <TouchableOpacity 
-             style={[styles.btn, styles.linkBtn, { flex: 1, marginRight: 8 }]} 
-             onPress={() => handleNavigate('/auth/student-signup')}
-           >
-             <Text style={styles.linkBtnText}>New Student?</Text>
-           </TouchableOpacity>
-           
-           <TouchableOpacity 
-             style={[styles.btn, styles.linkBtn, { flex: 1, marginLeft: 8 }]} 
-             onPress={() => handleNavigate('/auth/faculty-signup')}
-           >
-             <Text style={styles.linkBtnText}>New Faculty?</Text>
-           </TouchableOpacity>
+        <View style={styles.signupRow}>
+          <TouchableOpacity
+            style={styles.signupBtn}
+            onPress={() => handleNavigate('/auth/student-signup')}
+          >
+            <Text style={styles.signupBtnText}>Student Sign Up</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.signupBtn}
+            onPress={() => handleNavigate('/auth/faculty-signup')}
+          >
+            <Text style={styles.signupBtnText}>Faculty Sign Up</Text>
+          </TouchableOpacity>
         </View>
-        
       </Animated.View>
     </Modal>
   );
@@ -106,7 +98,7 @@ export default function AuthGateSheet({ visible, onClose, actionMessage, returnT
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.45)', // Custom requested semi-transparent
+    backgroundColor: 'rgba(0,0,0,0.55)',
   },
   sheetContainer: {
     position: 'absolute',
@@ -114,93 +106,71 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     backgroundColor: '#fff',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
     padding: 24,
-    paddingBottom: 40,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 8,
+    paddingBottom: 44,
   },
   handleBar: {
-    width: 40,
-    height: 4,
-    backgroundColor: '#DDDDDD',
+    width: 32,
+    height: 3,
+    backgroundColor: '#e0e0e0',
     borderRadius: 2,
     alignSelf: 'center',
-    marginBottom: 20,
+    marginBottom: 18,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 10,
   },
   title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#111',
   },
   closeBtn: {
-    padding: 6,
-    backgroundColor: '#F5F5F5',
-    borderRadius: 16,
+    padding: 4,
   },
   closeBtnText: {
     fontSize: 14,
-    fontWeight: 'bold',
-    color: '#666',
+    color: '#aaa',
   },
   message: {
-    fontSize: 15,
-    color: '#555',
-    lineHeight: 22,
-    marginBottom: 24,
-  },
-  btn: {
-    paddingVertical: 14,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
+    fontSize: 14,
+    color: '#888',
+    lineHeight: 20,
+    marginBottom: 20,
   },
   loginBtn: {
-    backgroundColor: '#1E90FF',
+    backgroundColor: '#111',
+    paddingVertical: 14,
+    borderRadius: 6,
+    alignItems: 'center',
+    marginBottom: 10,
   },
   loginBtnText: {
     color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
+    fontSize: 15,
+    fontWeight: '700',
   },
-  divider: {
+  signupRow: {
     flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 20,
+    gap: 8,
   },
-  line: {
+  signupBtn: {
     flex: 1,
-    height: 1,
-    backgroundColor: '#E0E0E0',
-  },
-  or: {
-    marginHorizontal: 12,
-    color: '#999',
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  linkBtn: {
-    backgroundColor: '#FAFAFA',
+    paddingVertical: 12,
+    borderRadius: 6,
     borderWidth: 1,
-    borderColor: '#E0E0E0',
+    borderColor: '#d5d5d5',
+    alignItems: 'center',
   },
-  linkBtnText: {
-    color: '#1E90FF',
-    fontSize: 14,
-    fontWeight: 'bold',
-  }
+  signupBtnText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#555',
+  },
 });
+

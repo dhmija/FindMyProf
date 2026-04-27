@@ -37,19 +37,42 @@ export default function DrawerLayout() {
   const { user, role } = useAuth();
 
   return (
-    <Drawer screenOptions={{ headerShown: true }} drawerContent={(props) => <CustomDrawerContent {...props} />}>
+    <Drawer 
+      screenOptions={{ 
+        headerShown: true,
+        drawerActiveBackgroundColor: 'transparent',
+        drawerActiveTintColor: '#111',
+        drawerInactiveTintColor: '#666',
+        drawerLabelStyle: {
+          fontSize: 15,
+          fontWeight: '500',
+        },
+        headerStyle: {
+          borderBottomWidth: 1,
+          borderBottomColor: '#f0f0f0',
+          elevation: 0,
+          shadowOpacity: 0,
+        },
+        headerTitleStyle: {
+          fontSize: 16,
+          fontWeight: '700',
+          color: '#111',
+        }
+      }} 
+      drawerContent={(props) => <CustomDrawerContent {...props} />}
+    >
       <Drawer.Screen 
         name="directory/index" 
         options={{ 
           drawerLabel: 'Faculty Directory',
-          headerTitle: 'Search'
+          headerTitle: 'Directory'
         }} 
       />
       <Drawer.Screen 
         name="student/home" 
         options={{ 
           drawerLabel: 'My Dashboard', 
-          headerTitle: 'Student Home',
+          headerTitle: 'Dashboard',
           drawerItemStyle: { display: user && role === 'student' ? 'flex' : 'none' } 
         }} 
       />
@@ -57,7 +80,7 @@ export default function DrawerLayout() {
         name="faculty/home" 
         options={{ 
           drawerLabel: 'My Dashboard', 
-          headerTitle: 'Faculty Home',
+          headerTitle: 'Dashboard',
           drawerItemStyle: { display: user && role === 'faculty' ? 'flex' : 'none' } 
         }} 
       />
@@ -98,8 +121,9 @@ export default function DrawerLayout() {
 
 const styles = StyleSheet.create({
   logoutContainer: {
-    paddingBottom: 20,
+    paddingBottom: 24,
+    paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: '#F0F0F0',
+    borderTopColor: '#f0f0f0',
   }
 });
