@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, TextInput, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter, useNavigation } from 'expo-router';
 import { collection, query, orderBy, onSnapshot, doc, getDoc } from 'firebase/firestore';
 import { firestore } from '../../../services/firebase';
 import { useAuth } from '../../../context/AuthContext';
@@ -11,12 +11,20 @@ export default function ChatScreen() {
   const { chatId, facultyId, studentId, displayName } = useLocalSearchParams();
   const { user, role } = useAuth();
   const { profile } = useProfile();
+  const navigation = useNavigation();
   
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState('');
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [facultyAllowed, setFacultyAllowed] = useState(true);
+
+  useEffect(() => {
+    navigation.setOptions({ 
+      title: displayName || 'Chat',
+      headerShown: true
+    });
+  }, [displayName, navigation]);
 
   // Validation strictly evaluating constraints
   useEffect(() => {
@@ -89,11 +97,7 @@ export default function ChatScreen() {
   };
 
   return (
-    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.container} keyboardVerticalOffset={90}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>{displayName || 'Chat'}</Text>
-      </View>
-
+    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.container} keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}>
       {!facultyAllowed && (
         <View style={styles.disabledBanner}>
           <Text style={styles.disabledBannerText}>This faculty is currently not accepting direct messages.</Text>
@@ -141,18 +145,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  header: {
-    padding: 16,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E0E0E0',
-    alignItems: 'center',
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-  },
   disabledBanner: {
     backgroundColor: '#FFEAEA',
     padding: 12,
@@ -164,7 +156,9 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   listContent: {
-    padding: 16,
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 8,
   },
   bubbleWrapper: {
     marginBottom: 12,
@@ -199,17 +193,17 @@ const styles = StyleSheet.create({
   },
   systemBubble: {
     alignSelf: 'center',
-    backgroundColor: '#FFF3E0',
+    backgroundColor: '#fff',
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: '#FFCC80',
+    borderColor: '#e5e5e5',
   },
   systemText: {
     fontSize: 12,
-    color: '#E65100',
+    color: '#888',
     fontWeight: '600',
   },
   inputContainer: {
@@ -232,17 +226,17 @@ const styles = StyleSheet.create({
     fontSize: 15,
   },
   sendBtn: {
-    backgroundColor: '#1E90FF',
+    backgroundColor: '#111',
     width: 60,
     height: 40,
-    borderRadius: 20,
+    borderRadius: 6,
     justifyContent: 'center',
     alignItems: 'center',
     marginLeft: 8,
     marginBottom: 2,
   },
   sendBtnDisabled: {
-    backgroundColor: '#999',
+    backgroundColor: '#e5e5e5',
   },
   sendText: {
     color: '#fff',

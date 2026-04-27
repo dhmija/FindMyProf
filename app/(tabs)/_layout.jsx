@@ -3,11 +3,13 @@ import { Tabs, useRouter } from "expo-router";
 import { useAuth } from "../../context/AuthContext";
 import { View, StyleSheet } from "react-native";
 import { Feather } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AuthGateSheet from "../../components/AuthGateSheet";
 
 export default function TabsLayout() {
   const { user } = useAuth();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   const [authSheetVisible, setAuthSheetVisible] = useState(false);
   const [authSheetMessage, setAuthSheetMessage] = useState("");
@@ -54,8 +56,8 @@ export default function TabsLayout() {
             borderTopWidth: 1,
             borderTopColor: '#e5e5e5',
             elevation: 0,
-            height: 60,
-            paddingBottom: 8,
+            height: 60 + insets.bottom,
+            paddingBottom: 8 + insets.bottom,
           },
           tabBarLabelStyle: {
             fontSize: 11,

@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator, Linking } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter, useNavigation } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Feather } from '@expo/vector-icons';
 import { doc, onSnapshot, collection, query, where } from 'firebase/firestore';
 import { firestore } from '../../../services/firebase';
 import StatusBadge from '../../../components/StatusBadge';
@@ -15,6 +17,8 @@ export default function DirectoryDetail() {
   const { user, role } = useAuth();
   const { profile } = useProfile();
   const router = useRouter();
+  const navigation = useNavigation();
+  const insets = useSafeAreaInsets();
   
   const [faculty, setFaculty] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -69,6 +73,18 @@ export default function DirectoryDetail() {
       unsubscribeBookings();
     };
   }, [id, user]);
+
+  useEffect(() => {
+    navigation.setOptions({ 
+      title: '', 
+      headerBackTitleVisible: false,
+      headerLeft: () => (
+        <TouchableOpacity onPress={() => router.back()} style={{ marginLeft: 16, padding: 4 }}>
+          <Feather name="chevron-left" size={24} color="#111" />
+        </TouchableOpacity>
+      )
+    });
+  }, [navigation, router]);
 
   const handleEmail = () => {
     if (faculty?.email) {
@@ -142,89 +158,77 @@ export default function DirectoryDetail() {
     );
   }
 
-  const initials = faculty.name ? faculty.name.split(' ').map(n => n[0]).join('').substring(0, 2) : '?';
-
   return (
     <>
-      <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
+      <ScrollView style={styles.container} contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 80 }]}>
         
-        {/* Header & Avatar Block */}
+        {/* Header Block */}
         <View style={styles.headerBlock}>
-          <View style={styles.avatar}>
-            <Text style={styles.avatarText}>{initials}</Text>
+          <View style={styles.headerInfo}>
+            <Text style={styles.name}>{faculty.name}</Text>
+            <Text style={styles.department}>{faculty.department}</Text>
           </View>
-          <Text style={styles.name}>{faculty.name}</Text>
-          <Text style={styles.department}>{faculty.department}</Text>
-          
           {faculty.isRegistered && (
-            <View style={styles.badgeWrapper}>
-              <StatusBadge status={faculty.status} />
-            </View>
+            <StatusBadge status={faculty.status} />
           )}
         </View>
 
         {/* Action Row */}
         {!faculty.isRegistered ? (
-          <View style={styles.card}>
+          <View style={{ marginBottom: 16 }}>
             <View style={styles.unregisteredBanner}>
-              <Text style={styles.unregisteredText}>Faculty hasn't joined FindMyProf yet</Text>
+               <Text style={styles.unregisteredText}>Faculty hasn't joined FindMyProf yet</Text>
             </View>
-            
-            <View style={styles.infoRow}>
-              <Text style={styles.label}>Location:</Text>
-              <Text style={styles.value}>
-                {faculty.block === 'M'
-                  ? `M Block · Floor ${faculty.floor} · Cubicle ${faculty.cubicle}`
-                  : `${faculty.block} Block · Cubicle ${faculty.cubicle}`}
-              </Text>
-            </View>
-            
             <TouchableOpacity style={styles.primaryButton} onPress={handleEmail}>
-              <Text style={styles.primaryButtonText}>Send an Email</Text>
+               <Text style={styles.primaryButtonText}>Send an Email</Text>
             </TouchableOpacity>
           </View>
         ) : (
-          <>
-            <View style={styles.actionRow}>
-              {faculty.acceptsMessages && (
-                <TouchableOpacity 
-                  style={[styles.actionButton, styles.msgButton]} 
-                  onPress={() => handleAuthGate("Login required to send a direct message.", navigateToChat)}
-                >
-                  <Text style={styles.actionButtonText}>Send Message</Text>
-                </TouchableOpacity>
-              )}
+          <View style={styles.actionRow}>
+            {faculty.acceptsMessages && (
               <TouchableOpacity 
-                style={[styles.actionButton, styles.notifyButton]} 
-                onPress={() => handleAuthGate("Login required to notify the faculty that you're heading over.", handleQuickNotify)}
-                disabled={notifyLoading}
+                style={[styles.actionButton, styles.msgButton]} 
+                onPress={() => handleAuthGate("Login required to send a direct message.", navigateToChat)}
               >
-                {notifyLoading ? <ActivityIndicator color="#fff" size="small"/> : <Text style={styles.actionButtonText}>I'm heading to your office</Text>}
+                <Text style={[styles.actionButtonText, { color: '#fff' }]}>Send Message</Text>
               </TouchableOpacity>
-            </View>
+            )}
+            <TouchableOpacity 
+              style={[styles.actionButton, styles.notifyButton]} 
+              onPress={() => handleAuthGate("Login required to notify the faculty that you're heading over.", handleQuickNotify)}
+              disabled={notifyLoading}
+            >
+              {notifyLoading ? <ActivityIndicator color="#fff" size="small"/> : <Text style={[styles.actionButtonText, { color: '#fff' }]}>I'm heading to your office</Text>}
+            </TouchableOpacity>
+          </View>
+        )}
 
-            {faculty.substitutionNotice ? (
-              <View style={styles.noticeBanner}>
-                <Text style={styles.noticeText}>⚠️ Notice: {faculty.substitutionNotice}</Text>
-              </View>
-            ) : null}
+        {/* Notices */}
+        {faculty.isRegistered && faculty.substitutionNotice ? (
+          <View style={styles.noticeBanner}>
+            <Text style={styles.noticeText}>⚠️ Notice: {faculty.substitutionNotice}</Text>
+          </View>
+        ) : null}
 
-            {/* Details Card */}
-            <View style={styles.card}>
-               <View style={styles.infoRow}>
-                <Text style={styles.label}>Location:</Text>
-                <Text style={styles.value}>
-                  {faculty.block === 'M'
-                    ? `M Block · Floor ${faculty.floor} · Cubicle ${faculty.cubicle}`
-                    : `${faculty.block} Block · Cubicle ${faculty.cubicle}`}
-                </Text>
-              </View>
-              <View style={styles.infoRow}>
-                <Text style={styles.label}>Email:</Text>
-                <Text style={styles.value}>{faculty.email}</Text>
-              </View>
-            </View>
+        {/* Info Rows (Flat format) */}
+        <View style={styles.flatInfoContainer}>
+           <View style={styles.infoRow}>
+            <Text style={styles.label}>Location</Text>
+            <Text style={styles.value}>
+              {faculty.block === 'M'
+                ? `M Block · Floor ${faculty.floor} · Cubicle ${faculty.cubicle}`
+                : `${faculty.block} Block · Cubicle ${faculty.cubicle}`}
+            </Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Text style={styles.label}>Email</Text>
+            <Text style={styles.value}>{faculty.email}</Text>
+          </View>
+        </View>
 
+        {/* Registered Additions */}
+        {faculty.isRegistered && (
+          <>
             {/* Office Hours */}
             <View style={styles.card}>
               <Text style={styles.cardTitle}>Office Hours Bookings</Text>
@@ -241,15 +245,13 @@ export default function DirectoryDetail() {
                            <Text style={styles.bookedText}>Unavailable</Text>
                         </View>
                       ) : (
-                        // Render standard book button for everyone, hit auth gate if unauthenticated implicitly via internal hook natively
-                        // Only hide completely if they are authenticated AND a faculty explicitly preventing loopbacks natively
                         ((!user || role === 'student') && (
                           <TouchableOpacity 
                             style={styles.bookButton} 
                             disabled={isLoading} 
                             onPress={() => handleAuthGate("Login required to secure an office hours slot.", () => handleBookSlot(slot))}
                           >
-                            {isLoading ? <ActivityIndicator color="#1E90FF" size="small" /> : <Text style={styles.bookText}>Book Slot</Text>}
+                            {isLoading ? <ActivityIndicator color="#fff" size="small" /> : <Text style={styles.bookText}>Book Slot</Text>}
                           </TouchableOpacity>
                         ))
                       )}
@@ -298,7 +300,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: 16,
-    paddingBottom: 48,
+    paddingTop: 16,
   },
   centerContainer: {
     flex: 1,
@@ -307,40 +309,28 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   headerBlock: {
-    alignItems: 'center',
-    paddingVertical: 24,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-    marginBottom: 20,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 16,
   },
-  avatar: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: '#f0f0f0',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  avatarText: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: '#555',
+  headerInfo: {
+    flex: 1,
+    paddingRight: 16,
   },
   name: {
-    fontSize: 22,
-    fontWeight: '700',
+    fontSize: 24,
+    fontWeight: '800',
     color: '#111',
-    textAlign: 'center',
-    marginBottom: 4,
+    lineHeight: 28,
   },
   department: {
     fontSize: 14,
     color: '#888',
-    textAlign: 'center',
+    marginTop: 4,
   },
-  badgeWrapper: {
-    marginTop: 12,
+  flatInfoContainer: {
+    marginBottom: 16,
   },
   // Section card
   card: {
@@ -365,29 +355,23 @@ const styles = StyleSheet.create({
     borderBottomColor: '#f0f0f0',
     marginBottom: 12,
   },
-  unregisteredText: {
-    color: '#aaa',
-    fontSize: 13,
-    textAlign: 'center',
-  },
-  // Info rows
   infoRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: 10,
+    alignItems: 'center',
+    paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: '#f5f5f5',
   },
   label: {
+    width: 80,
     fontSize: 13,
     fontWeight: '600',
     color: '#888',
   },
   value: {
-    fontSize: 13,
+    fontSize: 14,
     color: '#333',
     flex: 1,
-    textAlign: 'right',
   },
   // Buttons
   primaryButton: {
@@ -421,13 +405,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#333',
   },
-  actionButtonText: {
-    color: '#fff',
-    fontWeight: '700',
-    fontSize: 13,
-    textAlign: 'center',
-  },
-  // Notice
+  // Notices
   noticeBanner: {
     backgroundColor: '#fafafa',
     borderWidth: 1,

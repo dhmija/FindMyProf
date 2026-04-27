@@ -37,10 +37,10 @@ function RootNavigation() {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#F5F5F5' }}>
+    <View style={{ flex: 1, backgroundColor: '#F5F5F5' }}>
       <StatusBar style="auto" />
       <Slot />
-    </SafeAreaView>
+    </View>
   );
 }
 
