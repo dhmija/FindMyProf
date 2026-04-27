@@ -21,10 +21,8 @@ export default function ChatScreen() {
   // Validation strictly evaluating constraints
   useEffect(() => {
     const fetchConstraints = async () => {
-      // If we are evaluating a faculty user chatting, we should check the target faculty's acceptsMessages boolean natively.
-      // Wait, we are either interacting with a faculty or we are the faculty. 
-      // If we're a student, we check target faculty.
-      // If we are faculty, we can probably always respond.
+      if (!facultyId) return;
+      
       if (role === 'student') {
          const docSnap = await getDoc(doc(firestore, 'faculties', facultyId));
          if (docSnap.exists()) {

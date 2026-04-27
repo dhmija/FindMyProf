@@ -115,6 +115,13 @@ export default function DrawerLayout() {
           drawerItemStyle: { display: user && role === 'faculty' ? 'flex' : 'none' } 
         }} 
       />
+      <Drawer.Screen 
+        name="messages/[chatId]" 
+        options={{ 
+          drawerLabel: 'Chat', 
+          drawerItemStyle: { display: 'none' } 
+        }} 
+      />
     </Drawer>
   );
 }
