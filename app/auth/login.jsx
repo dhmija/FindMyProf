@@ -29,7 +29,11 @@ export default function LoginScreen() {
     setLoading(true);
     try {
       await login(email, password, role);
-      if (returnTo) { router.replace(returnTo); } else { router.replace(`/${role}/home`); }
+      if (returnTo) { 
+        router.replace(returnTo); 
+      } else { 
+        router.replace(role === 'faculty' ? "/(tabs)/profile" : "/(tabs)/directory"); 
+      }
     } catch (err) {
       setError(err.message || "Invalid email or password.");
       setLoading(false);

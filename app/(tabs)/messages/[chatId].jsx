@@ -80,7 +80,7 @@ export default function ChatScreen() {
   };
 
   const renderMessage = ({ item }) => {
-    const isMe = item.senderId === user?.uid;
+    const isMe = item.senderId ? item.senderId === user?.uid : false;
     if (item.isSystem) {
        return (
          <View style={styles.systemBubble}>

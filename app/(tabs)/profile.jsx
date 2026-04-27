@@ -23,6 +23,7 @@ export default function ProfileTab() {
   const [notice, setNotice] = useState('');
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const [isUpdatingNotice, setIsUpdatingNotice] = useState(false);
+  const [isUpdatingMessages, setIsUpdatingMessages] = useState(false);
   const confirmAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -86,6 +87,17 @@ export default function ProfileTab() {
       alert("Failed to clear notice.");
     } finally {
       setIsUpdatingNotice(false);
+    }
+  };
+
+  const handleToggleMessages = async () => {
+    setIsUpdatingMessages(true);
+    try {
+      await updateProfile({ acceptsMessages: !profile.acceptsMessages });
+    } catch (e) {
+      alert("Failed to update message settings.");
+    } finally {
+      setIsUpdatingMessages(false);
     }
   };
 
@@ -164,6 +176,31 @@ export default function ProfileTab() {
           <Text style={styles.greeting}>Faculty Dashboard</Text>
           <Text style={styles.name}>{profile.name}</Text>
           <Text style={styles.meta}>{profile.department}</Text>
+        </View>
+
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>MESSAGE SETTINGS</Text>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+            <Text style={{ fontSize: 15, fontWeight: '600', color: '#111' }}>Accept Direct Messages</Text>
+            <TouchableOpacity 
+              style={[
+                { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, borderWidth: 1 }, 
+                profile.acceptsMessages ? { backgroundColor: '#111', borderColor: '#111' } : { backgroundColor: '#f1f1f1', borderColor: '#e5e5e5' }
+              ]} 
+              onPress={handleToggleMessages}
+              disabled={isUpdatingMessages}
+            >
+              <Text style={[
+                { fontSize: 13, fontWeight: '600' },
+                profile.acceptsMessages ? { color: '#fff' } : { color: '#888' }
+              ]}>
+                {profile.acceptsMessages ? 'Enabled' : 'Disabled'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+          <Text style={styles.cardSubtitle}>
+            When disabled, students can notify you they are heading to your office but cannot chat.
+          </Text>
         </View>
 
         <View style={styles.card}>
