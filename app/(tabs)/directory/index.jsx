@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { View, Text, StyleSheet, FlatList, TextInput, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getAllFaculties } from '../../../services/facultyService';
+import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { firestore } from '../../../services/firebase';
 import FacultyCard from '../../../components/FacultyCard';
 
 const BLOCKS = ['All', 'M', 'N1', 'N2'];
@@ -15,24 +15,23 @@ export default function DirectoryIndex() {
   const [filterBlock, setFilterBlock] = useState('All');
   const [filterFloor, setFilterFloor] = useState(null);
 
-  const fetchFaculties = useCallback(async () => {
-    try {
-      const cached = await AsyncStorage.getItem('@faculties_cache');
-      if (cached) {
-        setFaculties(JSON.parse(cached));
+  useEffect(() => {
+    setLoading(true);
+    const q = query(collection(firestore, 'faculties'));
+    const unsub = onSnapshot(
+      q,
+      (snapshot) => {
+        const data = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        setFaculties(data);
+        setLoading(false);
+      },
+      (err) => {
+        console.error('Directory snapshot error:', err);
         setLoading(false);
       }
-      const freshData = await getAllFaculties();
-      setFaculties(freshData);
-      await AsyncStorage.setItem('@faculties_cache', JSON.stringify(freshData));
-    } catch (error) {
-      console.error("Error fetching faculties:", error);
-    } finally {
-      setLoading(false);
-    }
+    );
+    return () => unsub();
   }, []);
-
-  useEffect(() => { fetchFaculties(); }, [fetchFaculties]);
 
   const handleSearchChange = useCallback((text) => setSearchText(text), []);
 
@@ -113,7 +112,7 @@ export default function DirectoryIndex() {
 
       {loading && faculties.length === 0 ? (
         <View style={styles.center}>
-          <ActivityIndicator size="large" color="#111" />
+          <ActivityIndicator size="large" color="#1a1a1a" />
           <Text style={styles.loadingText}>Loading directory…</Text>
         </View>
       ) : (

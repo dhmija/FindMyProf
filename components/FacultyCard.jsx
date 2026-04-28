@@ -6,10 +6,33 @@ const FacultyCard = React.memo(({ faculty }) => {
   const router = useRouter();
   const pulseAnim = useRef(new Animated.Value(1)).current;
 
-  const { id, name, department, block, floor, cubicle, isRegistered, status } = faculty;
+  const { id, name, department, isRegistered, status } = faculty;
+
+  // Location: seeded faculty store flat fields; self-registered faculty store nested location object
+  const block   = faculty.block   ?? faculty.location?.block;
+  const floor   = faculty.floor   ?? faculty.location?.floor;
+  const cubicle = faculty.cubicle ?? faculty.location?.cubicle;
+
+  // Build location string — only render if at least block is defined
+  const locationStr = block
+    ? (block === 'M' && floor)
+      ? `M Block · Floor ${floor}${cubicle ? ` · Cubicle ${cubicle}` : ''}`
+      : `${block} Block${cubicle ? ` · Cubicle ${cubicle}` : ''}`
+    : null;
+
+  // Status badge: show for any registered faculty with a meaningful status
+  const statusLabel = !isRegistered
+    ? null
+    : status === 'available' ? 'Available'
+    : status === 'busy'     ? 'Busy'
+    : status === 'in_class' ? 'In Class'
+    : status === 'on_leave' ? 'On Leave'
+    : null;
+
+  const isAvailable = isRegistered && status === 'available';
 
   useEffect(() => {
-    if (isRegistered && status === 'available') {
+    if (isAvailable) {
       Animated.loop(
         Animated.sequence([
           Animated.timing(pulseAnim, { toValue: 0.3, duration: 1000, useNativeDriver: true }),
@@ -17,18 +40,9 @@ const FacultyCard = React.memo(({ faculty }) => {
         ])
       ).start();
     }
-  }, [isRegistered, status, pulseAnim]);
+  }, [isAvailable, pulseAnim]);
 
   const handlePress = () => router.push(`/directory/${id}`);
-
-  const statusLabel = !isRegistered
-    ? null
-    : status === 'available' ? 'Available'
-    : status === 'busy' ? 'Busy'
-    : status === 'on_leave' ? 'On Leave'
-    : null;
-
-  const isAvailable = isRegistered && status === 'available';
 
   return (
     <TouchableOpacity style={styles.card} onPress={handlePress} activeOpacity={0.6}>
@@ -48,11 +62,9 @@ const FacultyCard = React.memo(({ faculty }) => {
       </View>
 
       <Text style={styles.department} numberOfLines={1}>{department}</Text>
-      <Text style={styles.location}>
-        {block === 'M'
-          ? `M Block · Floor ${floor} · Cubicle ${cubicle}`
-          : `${block} Block · Cubicle ${cubicle}`}
-      </Text>
+      {locationStr ? (
+        <Text style={styles.location}>{locationStr}</Text>
+      ) : null}
     </TouchableOpacity>
   );
 });
