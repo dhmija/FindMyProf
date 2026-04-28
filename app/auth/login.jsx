@@ -43,7 +43,7 @@ export default function LoginScreen() {
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
       <Animated.ScrollView 
-        style={{ flex: 1, backgroundColor: '#fff', opacity: fadeAnim }} 
+        style={{ flex: 1, backgroundColor: '#fafaf8', opacity: fadeAnim }} 
         contentContainerStyle={[styles.container, { flexGrow: 1 }]}
         keyboardShouldPersistTaps="handled"
       >
@@ -110,12 +110,12 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 24,
     justifyContent: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: '#fafaf8',
   },
   title: {
     fontSize: 28,
     fontWeight: '800',
-    color: '#111',
+    color: '#1a1a1a',
     textAlign: 'center',
     marginBottom: 6,
     letterSpacing: -0.5,
@@ -138,14 +138,14 @@ const styles = StyleSheet.create({
   },
   input: {
     fontSize: 15,
-    color: '#111',
+    color: '#1a1a1a',
     borderWidth: 1,
     borderColor: '#e0e0e0',
     borderRadius: 6,
     paddingHorizontal: 14,
     paddingVertical: 12,
     marginBottom: 12,
-    backgroundColor: '#fff',
+    backgroundColor: '#fafaf8',
   },
   roleLabel: {
     fontSize: 12,
@@ -170,8 +170,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   rolePillActive: {
-    backgroundColor: '#111',
-    borderColor: '#111',
+    backgroundColor: '#1a1a1a',
+    borderColor: '#1a1a1a',
   },
   rolePillText: {
     fontSize: 14,
@@ -179,10 +179,10 @@ const styles = StyleSheet.create({
     color: '#888',
   },
   rolePillTextActive: {
-    color: '#fff',
+    color: '#fafaf8',
   },
   btn: {
-    backgroundColor: '#111',
+    backgroundColor: '#1a1a1a',
     paddingVertical: 14,
     borderRadius: 6,
     alignItems: 'center',
@@ -191,7 +191,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#ccc',
   },
   btnText: {
-    color: '#fff',
+    color: '#fafaf8',
     fontSize: 15,
     fontWeight: '700',
   },

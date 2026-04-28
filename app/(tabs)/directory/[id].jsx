@@ -144,7 +144,7 @@ export default function DirectoryDetail() {
   if (loading) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#1E90FF" />
+        <ActivityIndicator size="large" color="#1a1a1a" />
         <Text style={styles.mutedText}>Locating faculty profile...</Text>
       </View>
     );
@@ -190,7 +190,7 @@ export default function DirectoryDetail() {
                 style={[styles.actionButton, styles.msgButton]} 
                 onPress={() => handleAuthGate("Login required to send a direct message.", navigateToChat)}
               >
-                <Text style={[styles.actionButtonText, { color: '#fff' }]}>Send Message</Text>
+                <Text style={[styles.actionButtonText, { color: '#fafaf8' }]}>Send Message</Text>
               </TouchableOpacity>
             )}
             <TouchableOpacity 
@@ -198,7 +198,7 @@ export default function DirectoryDetail() {
               onPress={() => handleAuthGate("Login required to notify the faculty that you're heading over.", handleQuickNotify)}
               disabled={notifyLoading}
             >
-              {notifyLoading ? <ActivityIndicator color="#111" size="small"/> : <Text style={[styles.actionButtonText, { color: '#111' }]}>I'm heading to your office</Text>}
+              {notifyLoading ? <ActivityIndicator color="#1a1a1a" size="small"/> : <Text style={[styles.actionButtonText, { color: '#1a1a1a' }]}>I'm heading to your office</Text>}
             </TouchableOpacity>
           </View>
         )}
@@ -303,7 +303,7 @@ export default function DirectoryDetail() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#fafaf8',
   },
   scrollContent: {
     padding: 16,
@@ -313,7 +313,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: '#fafaf8',
   },
   headerBlock: {
     flexDirection: 'row',
@@ -328,7 +328,7 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 24,
     fontWeight: '800',
-    color: '#111',
+    color: '#1a1a1a',
     lineHeight: 28,
   },
   department: {
@@ -367,7 +367,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#f5f5f5',
+    borderBottomColor: '#e5e5e5',
   },
   label: {
     width: 80,
@@ -377,19 +377,19 @@ const styles = StyleSheet.create({
   },
   value: {
     fontSize: 14,
-    color: '#333',
+    color: '#1a1a1a',
     flex: 1,
   },
   // Buttons
   primaryButton: {
-    backgroundColor: '#111',
+    backgroundColor: '#1a1a1a',
     padding: 14,
     borderRadius: 6,
     alignItems: 'center',
     marginTop: 12,
   },
   primaryButtonText: {
-    color: '#fff',
+    color: '#fafaf8',
     fontWeight: '700',
     fontSize: 14,
   },
@@ -409,16 +409,16 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   msgButton: {
-    backgroundColor: '#111',
+    backgroundColor: '#1a1a1a',
   },
   notifyButton: {
     backgroundColor: 'transparent',
     borderWidth: 1,
-    borderColor: '#111',
+    borderColor: '#1a1a1a',
   },
   // Notices
   noticeBanner: {
-    backgroundColor: '#fafafa',
+    backgroundColor: '#fafaf8',
     borderWidth: 1,
     borderColor: '#e8e8e8',
     padding: 12,
@@ -426,7 +426,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   noticeText: {
-    color: '#666',
+    color: '#555555',
     fontSize: 13,
   },
   // Office hours slots
@@ -436,11 +436,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#f5f5f5',
+    borderBottomColor: '#e5e5e5',
   },
   slotText: {
     fontSize: 13,
-    color: '#333',
+    color: '#1a1a1a',
     flex: 1,
     paddingRight: 10,
   },
@@ -451,11 +451,11 @@ const styles = StyleSheet.create({
   bookButton: {
     paddingHorizontal: 12,
     paddingVertical: 6,
-    backgroundColor: '#111',
+    backgroundColor: '#1a1a1a',
     borderRadius: 4,
   },
   bookText: {
-    color: '#fff',
+    color: '#fafaf8',
     fontWeight: '600',
     fontSize: 12,
   },

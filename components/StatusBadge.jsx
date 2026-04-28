@@ -12,9 +12,9 @@ const STATUS_LABELS = {
 const getStatusStyle = (status) => {
   switch (status) {
     case 'available':
-      return { bg: '#111', text: '#fff', border: '#111' };
+      return { bg: '#1a1a1a', text: '#fafaf8', border: '#1a1a1a' };
     case 'busy':
-      return { bg: '#fff', text: '#111', border: '#111' };
+      return { bg: '#fafaf8', text: '#1a1a1a', border: '#1a1a1a' };
     case 'in_class':
     case 'not_on_campus':
       return { bg: '#f0f0f0', text: '#555', border: '#f0f0f0' };

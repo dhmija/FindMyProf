@@ -59,7 +59,7 @@ const FacultyCard = React.memo(({ faculty }) => {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#fff',
+    backgroundColor: '#fafaf8',
     paddingVertical: 14,
     paddingHorizontal: 16,
     borderBottomWidth: 1,
@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#111',
+    color: '#1a1a1a',
     flex: 1,
     paddingRight: 8,
   },
@@ -96,7 +96,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   badgeFilled: {
-    backgroundColor: '#111',
+    backgroundColor: '#1a1a1a',
   },
   badgeOutline: {
     borderWidth: 1,
@@ -106,7 +106,7 @@ const styles = StyleSheet.create({
     width: 5,
     height: 5,
     borderRadius: 3,
-    backgroundColor: '#fff',
+    backgroundColor: '#fafaf8',
     marginRight: 4,
   },
   badgeText: {
@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   badgeTextFilled: {
-    color: '#fff',
+    color: '#fafaf8',
   },
   badgeTextOutline: {
     color: '#888',

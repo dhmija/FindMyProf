@@ -72,10 +72,10 @@ export default function OfficeHoursBookingIndex() {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'confirmed': return '#4CAF50'; // Green
-      case 'cancelled': return '#F44336'; // Red
-      case 'pending': return '#FF9800'; // Orange
-      default: return '#9E9E9E';
+      case 'confirmed': return { bg: '#1a1a1a', text: '#fafaf8' };
+      case 'cancelled': return { bg: '#f0f0f0', text: '#555555' };
+      case 'pending':   return { bg: '#fafaf8', text: '#888888', border: '#d0d0d0' };
+      default:          return { bg: '#f0f0f0', text: '#888888' };
     }
   };
 
@@ -86,8 +86,11 @@ export default function OfficeHoursBookingIndex() {
       <View style={styles.bookingCard}>
         <View style={styles.cardHeader}>
           <Text style={styles.personName}>{isStudent ? item.facultyName : item.studentName}</Text>
-          <View style={[styles.statusBadge, { backgroundColor: getStatusColor(item.status) }]}>
-             <Text style={styles.statusText}>{item.status.toUpperCase()}</Text>
+          <View style={[styles.statusBadge, { 
+            backgroundColor: getStatusColor(item.status).bg,
+            borderColor: getStatusColor(item.status).border || getStatusColor(item.status).bg,
+          }]}>
+             <Text style={[styles.statusText, { color: getStatusColor(item.status).text }]}>{item.status.toUpperCase()}</Text>
           </View>
         </View>
 
@@ -101,7 +104,7 @@ export default function OfficeHoursBookingIndex() {
                disabled={actingOn === item.id}
                onPress={() => handleUpdateStatus(item.id, 'confirmed')}
             >
-              {actingOn === item.id ? <ActivityIndicator size="small" color="#fff"/> : <Text style={styles.btnText}>Confirm</Text>}
+              {actingOn === item.id ? <ActivityIndicator size="small" color="#fafaf8"/> : <Text style={styles.confirmBtnText}>Confirm</Text>}
             </TouchableOpacity>
             
             <TouchableOpacity 
@@ -109,7 +112,7 @@ export default function OfficeHoursBookingIndex() {
                disabled={actingOn === item.id}
                onPress={() => handleUpdateStatus(item.id, 'cancelled')}
             >
-              <Text style={styles.btnText}>Cancel</Text>
+              <Text style={styles.cancelBtnText}>Cancel</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -122,7 +125,7 @@ export default function OfficeHoursBookingIndex() {
                 disabled={actingOn === item.id}
                 onPress={() => handleUpdateStatus(item.id, 'cancelled')}
              >
-               {actingOn === item.id ? <ActivityIndicator size="small" color="#fff"/> : <Text style={styles.btnText}>Withdraw Request</Text>}
+               {actingOn === item.id ? <ActivityIndicator size="small" color="#555555"/> : <Text style={styles.cancelBtnText}>Withdraw Request</Text>}
              </TouchableOpacity>
            </View>
         )}
@@ -133,7 +136,7 @@ export default function OfficeHoursBookingIndex() {
   if (loading) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#1E90FF" />
+        <ActivityIndicator size="large" color="#1a1a1a" />
       </View>
     );
   }
@@ -158,7 +161,7 @@ export default function OfficeHoursBookingIndex() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FAFAFA',
+    backgroundColor: '#fafaf8',
   },
   centerContainer: {
     flex: 1,
@@ -170,11 +173,11 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   bookingCard: {
-    backgroundColor: '#fff',
+    backgroundColor: '#fafaf8',
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
-    shadowColor: '#000',
+    shadowColor: '#1a1a1a',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 2,
@@ -189,16 +192,16 @@ const styles = StyleSheet.create({
   personName: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#1a1a1a',
     flex: 1,
   },
   statusBadge: {
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 6,
+    borderWidth: 1,
   },
   statusText: {
-    color: '#fff',
     fontSize: 10,
     fontWeight: 'bold',
   },
@@ -219,13 +222,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   confirmBtn: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: '#1a1a1a',
   },
   cancelBtn: {
-    backgroundColor: '#F44336',
+    backgroundColor: '#f0f0f0',
   },
-  btnText: {
-    color: '#fff',
+  confirmBtnText: {
+    color: '#fafaf8',
+    fontWeight: 'bold',
+    fontSize: 13,
+  },
+  cancelBtnText: {
+    color: '#555555',
     fontWeight: 'bold',
     fontSize: 13,
   },

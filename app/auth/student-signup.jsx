@@ -86,7 +86,7 @@ export default function StudentSignupScreen() {
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
       <Animated.ScrollView 
-        style={{ flex: 1, backgroundColor: '#F5F5F5', opacity: fadeAnim }} 
+        style={{ flex: 1, backgroundColor: '#fafaf8', opacity: fadeAnim }} 
         contentContainerStyle={[styles.container, { flexGrow: 1 }]}
         keyboardShouldPersistTaps="handled"
       >
@@ -151,7 +151,7 @@ export default function StudentSignupScreen() {
       />
 
       <TouchableOpacity style={styles.btn} onPress={handleSignup} disabled={loading}>
-        {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.btnText}>Register</Text>}
+        {loading ? <ActivityIndicator color="#fafaf8" /> : <Text style={styles.btnText}>Register</Text>}
       </TouchableOpacity>
       
       <View style={styles.linkContainer}>
@@ -169,12 +169,12 @@ const styles = StyleSheet.create({
     padding: 24,
     paddingTop: 60,
     paddingBottom: 60,
-    backgroundColor: '#fff',
+    backgroundColor: '#fafaf8',
   },
   title: {
     fontSize: 24,
     fontWeight: '800',
-    color: '#111',
+    color: '#1a1a1a',
     textAlign: 'center',
     marginBottom: 6,
     letterSpacing: -0.5,
@@ -199,24 +199,24 @@ const styles = StyleSheet.create({
   },
   input: {
     fontSize: 15,
-    color: '#111',
+    color: '#1a1a1a',
     borderWidth: 1,
     borderColor: '#e0e0e0',
     borderRadius: 6,
     paddingHorizontal: 14,
     paddingVertical: 12,
     marginBottom: 12,
-    backgroundColor: '#fff',
+    backgroundColor: '#fafaf8',
   },
   btn: {
-    backgroundColor: '#111',
+    backgroundColor: '#1a1a1a',
     paddingVertical: 14,
     borderRadius: 6,
     alignItems: 'center',
     marginTop: 4,
   },
   btnText: {
-    color: '#fff',
+    color: '#fafaf8',
     fontSize: 15,
     fontWeight: '700',
   },

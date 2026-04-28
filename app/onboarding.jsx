@@ -40,7 +40,7 @@ export default function OnboardingScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FAFAFA',
+    backgroundColor: '#fafaf8',
   },
   content: {
     flex: 1,
@@ -50,18 +50,18 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#1a1a1a',
     marginBottom: 8,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
-    color: '#666',
+    color: '#555555',
     marginBottom: 40,
     textAlign: 'center',
   },
   card: {
-    backgroundColor: '#FFF',
+    backgroundColor: '#fafaf8',
     padding: 20,
     borderRadius: 12,
     marginBottom: 16,
@@ -71,7 +71,7 @@ const styles = StyleSheet.create({
   roleHeader: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#1a1a1a',
     marginBottom: 8,
   },
   roleDesc: {
@@ -83,13 +83,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   continueBtn: {
-    backgroundColor: '#1E90FF',
+    backgroundColor: '#1a1a1a',
     paddingVertical: 18,
     borderRadius: 12,
     alignItems: 'center',
   },
   continueBtnText: {
-    color: '#FFF',
+    color: '#fafaf8',
     fontSize: 18,
     fontWeight: 'bold',
   }

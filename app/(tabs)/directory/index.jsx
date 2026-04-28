@@ -141,7 +141,7 @@ export default function DirectoryIndex() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#fafaf8',
   },
   searchRow: {
     paddingHorizontal: 16,
@@ -150,13 +150,13 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     fontSize: 15,
-    color: '#111',
+    color: '#1a1a1a',
     borderWidth: 1,
     borderColor: '#e0e0e0',
     borderRadius: 6,
     paddingHorizontal: 12,
     paddingVertical: 10,
-    backgroundColor: '#fff',
+    backgroundColor: '#fafaf8',
   },
   filterRow: {
     flexDirection: 'row',
@@ -172,8 +172,8 @@ const styles = StyleSheet.create({
     borderColor: '#d0d0d0',
   },
   pillActive: {
-    backgroundColor: '#111',
-    borderColor: '#111',
+    backgroundColor: '#1a1a1a',
+    borderColor: '#1a1a1a',
   },
   pillText: {
     fontSize: 13,
@@ -181,7 +181,7 @@ const styles = StyleSheet.create({
     color: '#555',
   },
   pillTextActive: {
-    color: '#fff',
+    color: '#fafaf8',
   },
   pillSmall: {
     paddingHorizontal: 10,
@@ -193,7 +193,7 @@ const styles = StyleSheet.create({
   pillSmallText: {
     fontSize: 12,
     fontWeight: '500',
-    color: '#666',
+    color: '#555555',
   },
   divider: {
     height: 1,

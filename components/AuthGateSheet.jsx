@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: '#fff',
+    backgroundColor: '#fafaf8',
     borderTopLeftRadius: 10,
     borderTopRightRadius: 10,
     padding: 24,
@@ -128,7 +128,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#111',
+    color: '#1a1a1a',
   },
   closeBtn: {
     padding: 4,
@@ -144,14 +144,14 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   loginBtn: {
-    backgroundColor: '#111',
+    backgroundColor: '#1a1a1a',
     paddingVertical: 14,
     borderRadius: 6,
     alignItems: 'center',
     marginBottom: 10,
   },
   loginBtnText: {
-    color: '#fff',
+    color: '#fafaf8',
     fontSize: 15,
     fontWeight: '700',
   },

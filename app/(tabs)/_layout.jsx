@@ -47,12 +47,12 @@ export default function TabsLayout() {
           headerTitleStyle: {
             fontSize: 16,
             fontWeight: '700',
-            color: '#111',
+            color: '#1a1a1a',
           },
-          tabBarActiveTintColor: '#111',
+          tabBarActiveTintColor: '#1a1a1a',
           tabBarInactiveTintColor: '#aaa',
           tabBarStyle: {
-            backgroundColor: '#fff',
+            backgroundColor: '#fafaf8',
             borderTopWidth: 1,
             borderTopColor: '#e5e5e5',
             elevation: 0,

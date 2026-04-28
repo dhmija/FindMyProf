@@ -114,7 +114,7 @@ export default function ChatScreen() {
 
       {loading ? (
         <View style={styles.centerContainer}>
-          <ActivityIndicator size="small" color="#1E90FF" />
+          <ActivityIndicator size="small" color="#111" />
         </View>
       ) : (
         <FlatList
@@ -147,7 +147,7 @@ export default function ChatScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FAFAFA',
+    backgroundColor: '#fafaf8',
   },
   centerContainer: {
     flex: 1,
@@ -155,12 +155,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   disabledBanner: {
-    backgroundColor: '#FFEAEA',
+    backgroundColor: '#f0f0f0',
     padding: 12,
     alignItems: 'center',
   },
   disabledBannerText: {
-    color: '#D8000C',
+    color: '#888888',
     fontSize: 13,
     fontWeight: '600',
   },
@@ -186,23 +186,23 @@ const styles = StyleSheet.create({
     borderRadius: 16,
   },
   bubbleLeft: {
-    backgroundColor: '#E0E0E0',
+    backgroundColor: '#f0f0f0',
     borderBottomLeftRadius: 4,
   },
   bubbleRight: {
-    backgroundColor: '#1E90FF',
+    backgroundColor: '#1a1a1a',
     borderBottomRightRadius: 4,
   },
   messageText: {
     fontSize: 15,
-    color: '#333',
+    color: '#1a1a1a',
   },
   messageTextRight: {
-    color: '#fff',
+    color: '#fafaf8',
   },
   systemBubble: {
     alignSelf: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: '#fafaf8',
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
@@ -218,14 +218,14 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: 'row',
     padding: 12,
-    backgroundColor: '#fff',
+    backgroundColor: '#fafaf8',
     borderTopWidth: 1,
     borderTopColor: '#E0E0E0',
     alignItems: 'flex-end',
   },
   input: {
     flex: 1,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: '#fafaf8',
     borderRadius: 20,
     paddingHorizontal: 16,
     paddingTop: 12,
@@ -235,7 +235,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
   },
   sendBtn: {
-    backgroundColor: '#111',
+    backgroundColor: '#1a1a1a',
     width: 60,
     height: 40,
     borderRadius: 6,
@@ -248,7 +248,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#e5e5e5',
   },
   sendText: {
-    color: '#fff',
+    color: '#fafaf8',
     fontWeight: 'bold',
     fontSize: 14,
   }

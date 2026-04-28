@@ -42,12 +42,13 @@ function RootNavigation() {
     return (
       <View style={styles.splashContainer}>
         <Text style={styles.splashTitle}>FindMyProf</Text>
+        <Text style={styles.splashSubtitle}>faculty directory</Text>
       </View>
     );
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#F5F5F5' }}>
+    <View style={{ flex: 1, backgroundColor: '#fafaf8' }}>
       <StatusBar style="auto" />
       <Slot />
     </View>
@@ -71,11 +72,18 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#1E90FF',
+    backgroundColor: '#fafaf8',
   },
   splashTitle: {
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: 'bold',
-    color: 'white',
-  }
+    color: '#1a1a1a',
+    letterSpacing: -0.5,
+  },
+  splashSubtitle: {
+    fontSize: 14,
+    color: '#888888',
+    marginTop: 6,
+    letterSpacing: 0.2,
+  },
 });

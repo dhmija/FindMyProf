@@ -84,7 +84,7 @@ export default function MessagesIndex() {
   if (loading) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#1E90FF" />
+        <ActivityIndicator size="large" color="#1a1a1a" />
       </View>
     );
   }
@@ -111,7 +111,7 @@ export default function MessagesIndex() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FAFAFA',
+    backgroundColor: '#fafaf8',
   },
   centerContainer: {
     flex: 1,
@@ -123,11 +123,11 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   threadCard: {
-    backgroundColor: '#fff',
+    backgroundColor: '#fafaf8',
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
-    shadowColor: '#000',
+    shadowColor: '#1a1a1a',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 2,
@@ -141,7 +141,7 @@ const styles = StyleSheet.create({
   threadName: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#1a1a1a',
   },
   threadTime: {
     fontSize: 12,
@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
   },
   threadMessage: {
     fontSize: 14,
-    color: '#666',
+    color: '#555555',
   },
   emptyText: {
     color: '#999',

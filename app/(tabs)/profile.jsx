@@ -196,7 +196,7 @@ export default function ProfileTab() {
     }
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#111" />
+        <ActivityIndicator size="large" color="#1a1a1a" />
       </View>
     );
   }
@@ -254,8 +254,8 @@ export default function ProfileTab() {
             <Switch 
               value={phoneVisible} 
               onValueChange={setPhoneVisible}
-              trackColor={{ false: '#e5e5e5', true: '#111' }}
-              thumbColor={'#fff'}
+              trackColor={{ false: '#e5e5e5', true: '#1a1a1a' }}
+              thumbColor={'#fafaf8'}
             />
           </View>
         </View>
@@ -355,13 +355,13 @@ export default function ProfileTab() {
         <View style={styles.card}>
           <Text style={styles.cardTitle}>MESSAGE SETTINGS</Text>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-            <Text style={{ fontSize: 14, fontWeight: '600', color: '#111' }}>Accept Direct Messages</Text>
+            <Text style={{ fontSize: 14, fontWeight: '600', color: '#1a1a1a' }}>Accept Direct Messages</Text>
             <Switch 
               value={profile.acceptsMessages} 
               onValueChange={handleToggleMessages}
               disabled={isUpdatingMessages}
-              trackColor={{ false: '#e5e5e5', true: '#111' }}
-              thumbColor={'#fff'}
+              trackColor={{ false: '#e5e5e5', true: '#1a1a1a' }}
+              thumbColor={'#fafaf8'}
             />
           </View>
           <Text style={styles.cardSubtitle}>
@@ -387,13 +387,13 @@ export default function ProfileTab() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#fafaf8',
   },
   centerContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: '#fafaf8',
     padding: 24,
   },
   scrollContent: {
@@ -407,7 +407,7 @@ const styles = StyleSheet.create({
   appLogo: {
     fontSize: 28,
     fontWeight: '800',
-    color: '#111',
+    color: '#1a1a1a',
     marginBottom: 6,
     letterSpacing: -0.5,
   },
@@ -417,7 +417,7 @@ const styles = StyleSheet.create({
     marginBottom: 32,
   },
   primaryBtn: {
-    backgroundColor: '#111',
+    backgroundColor: '#1a1a1a',
     width: '100%',
     paddingVertical: 14,
     borderRadius: 6,
@@ -425,7 +425,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   primaryBtnText: {
-    color: '#fff',
+    color: '#fafaf8',
     fontSize: 15,
     fontWeight: '700',
   },
@@ -438,7 +438,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   outlineBtnText: {
-    color: '#111',
+    color: '#1a1a1a',
     fontSize: 15,
     fontWeight: '600',
   },
@@ -457,11 +457,11 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 24,
     fontWeight: '800',
-    color: '#111',
+    color: '#1a1a1a',
   },
   meta: {
     fontSize: 14,
-    color: '#666',
+    color: '#555555',
     marginTop: 4,
   },
   card: {
@@ -499,8 +499,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   statusBtnActive: {
-    backgroundColor: '#111',
-    borderColor: '#111',
+    backgroundColor: '#1a1a1a',
+    borderColor: '#1a1a1a',
   },
   statusBtnText: {
     color: '#888',
@@ -508,7 +508,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
   },
   statusBtnTextActive: {
-    color: '#fff',
+    color: '#fafaf8',
   },
   staticEmail: {
     fontSize: 13,
@@ -522,17 +522,17 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   inputField: {
-    backgroundColor: '#FAFAFA',
+    backgroundColor: '#fafaf8',
     borderWidth: 1,
-    borderColor: '#EAEAEA',
+    borderColor: '#e5e5e5',
     borderRadius: 8,
     paddingHorizontal: 16,
     paddingVertical: 12,
     fontSize: 14,
-    color: '#333',
+    color: '#1a1a1a',
   },
   inlineActionBtn: {
-    backgroundColor: '#111',
+    backgroundColor: '#1a1a1a',
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderRadius: 8,
@@ -540,7 +540,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   inlineActionText: {
-    color: '#fff',
+    color: '#fafaf8',
     fontWeight: 'bold',
     fontSize: 13,
   },
@@ -564,14 +564,14 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 12,
     borderWidth: 1,
-    borderColor: '#EAEAEA',
+    borderColor: '#e5e5e5',
     borderRadius: 8,
     alignItems: 'center',
-    backgroundColor: '#FAFAFA',
+    backgroundColor: '#fafaf8',
   },
   segmentBtnActive: {
-    backgroundColor: '#111',
-    borderColor: '#111',
+    backgroundColor: '#1a1a1a',
+    borderColor: '#1a1a1a',
   },
   segmentBtnText: {
     color: '#888',
@@ -579,12 +579,12 @@ const styles = StyleSheet.create({
     fontSize: 13,
   },
   segmentBtnTextActive: {
-    color: '#fff',
+    color: '#fafaf8',
   },
   chipBtn: {
-    backgroundColor: '#FAFAFA',
+    backgroundColor: '#fafaf8',
     borderWidth: 1,
-    borderColor: '#EAEAEA',
+    borderColor: '#e5e5e5',
     borderRadius: 16,
     paddingHorizontal: 14,
     paddingVertical: 8,
@@ -599,25 +599,25 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#FAFAFA',
+    backgroundColor: '#fafaf8',
     borderWidth: 1,
-    borderColor: '#EAEAEA',
+    borderColor: '#e5e5e5',
     borderRadius: 8,
     padding: 12,
     marginBottom: 8,
   },
   ohDay: {
     fontWeight: 'bold',
-    color: '#333',
+    color: '#1a1a1a',
     fontSize: 14,
   },
   ohTime: {
-    color: '#666',
+    color: '#555555',
     fontSize: 13,
     marginTop: 2,
   },
   delText: {
-    color: '#D8000C',
+    color: '#888888',
     fontWeight: 'bold',
     fontSize: 12,
   },
@@ -627,7 +627,7 @@ const styles = StyleSheet.create({
   },
   floatingSuccess: {
     textAlign: 'center',
-    color: '#111',
+    color: '#1a1a1a',
     fontWeight: 'bold',
     marginVertical: 16,
   }
