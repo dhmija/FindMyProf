@@ -57,6 +57,12 @@ export default function ChatScreen() {
       }));
       setMessages(liveMsgs);
       setLoading(false);
+    }, (error) => {
+      // Silently ignore permission errors that fire on logout.
+      if (error.code !== 'permission-denied') {
+        console.error('Chat snapshot error:', error);
+      }
+      setLoading(false);
     });
 
     return () => unsubscribe();

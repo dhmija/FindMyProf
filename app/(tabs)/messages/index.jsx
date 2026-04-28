@@ -49,6 +49,11 @@ export default function MessagesIndex() {
       setThreads(liveThreads);
       setLoading(false);
     }, (error) => {
+      // After logout, Firebase fires permission-denied — bail out silently.
+      if (error.code === 'permission-denied') {
+        setLoading(false);
+        return;
+      }
       console.error(error);
       const fallbackQ = query(chatsRef, where('participants', 'array-contains', user.uid));
       fallbackUnsubscribe = onSnapshot(fallbackQ, (fallbackSnap) => {
@@ -56,6 +61,8 @@ export default function MessagesIndex() {
           fbThreads.sort((a,b) => (b.lastMessageTimestamp?.toMillis() || 0) - (a.lastMessageTimestamp?.toMillis() || 0));
           setThreads(fbThreads);
           setLoading(false);
+      }, (fbError) => {
+          if (fbError.code !== 'permission-denied') console.error(fbError);
       });
     });
 

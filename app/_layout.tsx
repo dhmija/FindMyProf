@@ -26,7 +26,17 @@ function RootNavigation() {
     return () => clearTimeout(timer);
   }, []);
 
-  // Auth protection routing removed as it is now handled by tab listeners and AuthGateSheet.
+  // Segment-based navigation guard
+  useEffect(() => {
+    if (!loading) {
+      const inTabsGroup = segments[0] === '(tabs)';
+      const isProtectedRoute = inTabsGroup && ['messages', 'office-hours', 'profile'].includes(segments[1]);
+      
+      if (!user && isProtectedRoute) {
+        router.replace('/(tabs)/directory');
+      }
+    }
+  }, [user, loading, segments]);
 
   if (loading || splashVisible) {
     return (

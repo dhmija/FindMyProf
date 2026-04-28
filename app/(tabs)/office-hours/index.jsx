@@ -34,6 +34,11 @@ export default function OfficeHoursBookingIndex() {
       setBookings(liveBookings);
       setLoading(false);
     }, (error) => {
+      // After logout, Firebase fires permission-denied — bail out silently.
+      if (error.code === 'permission-denied') {
+        setLoading(false);
+        return;
+      }
       console.error(error);
       const fallbackQ = query(bookingsRef, where(fieldConstraint, '==', user.uid));
       fallbackUnsubscribe = onSnapshot(fallbackQ, (fallbackSnap) => {
@@ -41,6 +46,8 @@ export default function OfficeHoursBookingIndex() {
           fbBookings.sort((a,b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
           setBookings(fbBookings);
           setLoading(false);
+      }, (fbError) => {
+          if (fbError.code !== 'permission-denied') console.error(fbError);
       });
     });
 
