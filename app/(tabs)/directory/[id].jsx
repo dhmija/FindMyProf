@@ -270,21 +270,7 @@ export default function DirectoryDetail() {
               )}
             </View>
 
-            {/* Subjects List */}
-            <View style={styles.card}>
-              <Text style={styles.cardTitle}>Subjects Taught</Text>
-              {faculty.subjects && faculty.subjects.length > 0 ? (
-                 <View style={styles.pillContainer}>
-                   {faculty.subjects.map((sub, idx) => (
-                     <View key={idx} style={styles.pill}>
-                       <Text style={styles.pillText}>{sub}</Text>
-                     </View>
-                   ))}
-                 </View>
-              ) : (
-                <Text style={styles.mutedText}>No subjects listed.</Text>
-              )}
-            </View>
+
           </>
         )}
       </ScrollView>
