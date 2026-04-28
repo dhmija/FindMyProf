@@ -3,6 +3,8 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, Animated, Activity
 import { useAuth } from '../../context/AuthContext';
 import { useProfile } from '../../context/UserContext';
 import { useRouter } from 'expo-router';
+import { collection, query, where, orderBy, onSnapshot } from 'firebase/firestore';
+import { firestore } from '../../services/firebase';
 
 const STATUSES = [
   { id: 'available', label: 'Available' },
@@ -36,6 +38,14 @@ export default function ProfileTab() {
   const [isUpdatingText, setIsUpdatingText] = useState(false);
   const [isUpdatingMessages, setIsUpdatingMessages] = useState(false);
   const confirmAnim = useRef(new Animated.Value(0)).current;
+
+  // Student edit state
+  const [editingField, setEditingField] = useState(null);
+  const [editName, setEditName] = useState('');
+  const [editSemester, setEditSemester] = useState('');
+  const [editDepartment, setEditDepartment] = useState('');
+  const [studentBookings, setStudentBookings] = useState([]);
+  const [studentChats, setStudentChats] = useState([]);
 
   useEffect(() => {
     if (profile) {
@@ -160,6 +170,57 @@ export default function ProfileTab() {
     router.replace('/(tabs)/directory');
   };
 
+  // --- STUDENT effects & handlers ---
+  useEffect(() => {
+    if (role === 'student' && profile) {
+      setEditName(profile.fullName || profile.name || '');
+      setEditSemester(profile.semester?.toString() || '');
+      setEditDepartment(profile.department || '');
+    }
+  }, [profile, role]);
+
+  useEffect(() => {
+    if (role !== 'student' || !user?.uid) return;
+
+    const bQ = query(
+      collection(firestore, 'bookings'),
+      where('studentId', '==', user.uid),
+      orderBy('createdAt', 'desc')
+    );
+    const unsubB = onSnapshot(bQ,
+      (snap) => setStudentBookings(snap.docs.map(d => ({ id: d.id, ...d.data() }))),
+      (err) => { if (err.code !== 'permission-denied') console.error(err); }
+    );
+
+    const cQ = query(
+      collection(firestore, 'chats'),
+      where('studentId', '==', user.uid)
+    );
+    const unsubC = onSnapshot(cQ,
+      (snap) => {
+        const threads = snap.docs
+          .map(d => ({ id: d.id, ...d.data() }))
+          .sort((a, b) => (b.lastMessageTimestamp?.seconds || 0) - (a.lastMessageTimestamp?.seconds || 0));
+        setStudentChats(threads);
+      },
+      (err) => { if (err.code !== 'permission-denied') console.error(err); }
+    );
+
+    return () => { unsubB(); unsubC(); };
+  }, [role, user?.uid]);
+
+  const handleStudentFieldSave = async (field) => {
+    try {
+      if (field === 'name') await updateProfile({ fullName: editName.trim() });
+      else if (field === 'semester') await updateProfile({ semester: parseInt(editSemester) });
+      else if (field === 'department') await updateProfile({ department: editDepartment.trim() });
+      setEditingField(null);
+      showConfirmation();
+    } catch (e) {
+      alert('Failed to save.');
+    }
+  };
+
   // --- GUEST VIEW ---
   if (!user) {
     return (
@@ -203,21 +264,169 @@ export default function ProfileTab() {
 
   // --- STUDENT VIEW ---
   if (role === 'student') {
+    const statusConfig = {
+      confirmed: { bg: '#1a1a1a', text: '#fafaf8', border: '#1a1a1a' },
+      pending:   { bg: '#fafaf8', text: '#888888', border: '#d0d0d0' },
+      cancelled: { bg: '#f0f0f0', text: '#555555', border: '#f0f0f0' },
+    };
+
     return (
-      <ScrollView contentContainerStyle={styles.scrollContent} style={styles.container}>
-        <View style={styles.header}>
-          <Text style={styles.greeting}>Student Dashboard</Text>
-          <Text style={styles.name}>{profile.fullName || profile.name}</Text>
-          <Text style={styles.meta}>{profile.department} | Sem {profile.semester}</Text>
-        </View>
-        
-        <View style={styles.card}>
-           <Text style={styles.cardTitle}>ACCOUNT OPTIONS</Text>
-           <TouchableOpacity style={[styles.primaryBtn, {marginTop: 10}]} onPress={handleLogout}>
-              <Text style={styles.primaryBtnText}>Logout</Text>
-           </TouchableOpacity>
-        </View>
-      </ScrollView>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.container}>
+        <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
+
+          {/* Header */}
+          <View style={styles.header}>
+            <Text style={styles.greeting}>Student Dashboard</Text>
+            <Text style={styles.name}>{profile.fullName || profile.name}</Text>
+            <Text style={styles.meta}>{profile.department} | Sem {profile.semester}</Text>
+          </View>
+
+          {/* Edit Profile */}
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>PROFILE</Text>
+
+            {/* Name */}
+            <View style={styles.editRow}>
+              <Text style={styles.editLabel}>Name</Text>
+              {editingField === 'name' ? (
+                <View style={styles.editInputWrap}>
+                  <TextInput
+                    style={[styles.inputField, { flex: 1 }]}
+                    value={editName}
+                    onChangeText={setEditName}
+                    autoFocus
+                    returnKeyType="done"
+                  />
+                  <TouchableOpacity style={styles.inlineActionBtn} onPress={() => handleStudentFieldSave('name')}>
+                    <Text style={styles.inlineActionText}>Save</Text>
+                  </TouchableOpacity>
+                </View>
+              ) : (
+                <View style={styles.editValueRow}>
+                  <Text style={styles.editValue}>{profile.fullName || profile.name}</Text>
+                  <TouchableOpacity onPress={() => { setEditName(profile.fullName || profile.name || ''); setEditingField('name'); }}>
+                    <Text style={styles.editLink}>Edit</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+            </View>
+
+            {/* Department */}
+            <View style={styles.editRow}>
+              <Text style={styles.editLabel}>Department</Text>
+              {editingField === 'department' ? (
+                <View style={styles.editInputWrap}>
+                  <TextInput
+                    style={[styles.inputField, { flex: 1 }]}
+                    value={editDepartment}
+                    onChangeText={setEditDepartment}
+                    autoFocus
+                    returnKeyType="done"
+                  />
+                  <TouchableOpacity style={styles.inlineActionBtn} onPress={() => handleStudentFieldSave('department')}>
+                    <Text style={styles.inlineActionText}>Save</Text>
+                  </TouchableOpacity>
+                </View>
+              ) : (
+                <View style={styles.editValueRow}>
+                  <Text style={styles.editValue}>{profile.department}</Text>
+                  <TouchableOpacity onPress={() => { setEditDepartment(profile.department || ''); setEditingField('department'); }}>
+                    <Text style={styles.editLink}>Edit</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+            </View>
+
+            {/* Semester */}
+            <View style={[styles.editRow, { borderBottomWidth: 0, paddingBottom: 0 }]}>
+              <Text style={styles.editLabel}>Semester</Text>
+              {editingField === 'semester' ? (
+                <>
+                  <View style={styles.semesterGrid}>
+                    {[1,2,3,4,5,6,7,8].map(s => (
+                      <TouchableOpacity
+                        key={s}
+                        style={[styles.semPill, editSemester === String(s) && styles.semPillActive]}
+                        onPress={() => setEditSemester(String(s))}
+                      >
+                        <Text style={[styles.semPillText, editSemester === String(s) && styles.semPillTextActive]}>{s}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                  <TouchableOpacity style={[styles.inlineActionBtn, { alignSelf: 'flex-end', marginTop: 10 }]} onPress={() => handleStudentFieldSave('semester')}>
+                    <Text style={styles.inlineActionText}>Save</Text>
+                  </TouchableOpacity>
+                </>
+              ) : (
+                <View style={styles.editValueRow}>
+                  <Text style={styles.editValue}>Semester {profile.semester}</Text>
+                  <TouchableOpacity onPress={() => { setEditSemester(profile.semester?.toString() || ''); setEditingField('semester'); }}>
+                    <Text style={styles.editLink}>Edit</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+            </View>
+          </View>
+
+          {/* My Bookings */}
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>MY BOOKINGS</Text>
+            {studentBookings.length === 0 ? (
+              <Text style={styles.emptyState}>No bookings yet.</Text>
+            ) : (
+              studentBookings.map((b, i) => {
+                const sc = statusConfig[b.status] || statusConfig.pending;
+                return (
+                  <View key={b.id} style={[styles.listRow, i === studentBookings.length - 1 && { borderBottomWidth: 0 }]}>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.listPrimary}>{b.facultyName}</Text>
+                      <Text style={styles.listSecondary}>{b.slot}</Text>
+                    </View>
+                    <View style={[styles.statusPill, { backgroundColor: sc.bg, borderColor: sc.border }]}>
+                      <Text style={[styles.statusPillText, { color: sc.text }]}>{(b.status || '').toUpperCase()}</Text>
+                    </View>
+                  </View>
+                );
+              })
+            )}
+          </View>
+
+          {/* Recent Chats */}
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>RECENT MESSAGES</Text>
+            {studentChats.length === 0 ? (
+              <Text style={styles.emptyState}>No messages yet.</Text>
+            ) : (
+              studentChats.map((thread, i) => {
+                const ts = thread.lastMessageTimestamp;
+                const timeStr = ts ? new Date(ts.seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+                return (
+                  <TouchableOpacity
+                    key={thread.id}
+                    style={[styles.listRow, i === studentChats.length - 1 && { borderBottomWidth: 0 }]}
+                    onPress={() => router.push({ pathname: `/messages/${thread.id}`, params: { facultyId: thread.facultyId, studentId: thread.studentId, displayName: thread.facultyName } })}
+                  >
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.listPrimary}>{thread.facultyName}</Text>
+                      <Text style={styles.listSecondary} numberOfLines={1}>{thread.lastMessage}</Text>
+                    </View>
+                    <Text style={styles.listTime}>{timeStr}</Text>
+                  </TouchableOpacity>
+                );
+              })
+            )}
+          </View>
+
+          <Animated.Text style={[styles.floatingSuccess, { opacity: confirmAnim }]}>
+            Saved successfully
+          </Animated.Text>
+
+          <TouchableOpacity style={styles.signOutBtn} onPress={handleLogout}>
+            <Text style={styles.signOutText}>Sign out</Text>
+          </TouchableOpacity>
+
+        </ScrollView>
+      </KeyboardAvoidingView>
     );
   }
 
@@ -630,5 +839,117 @@ const styles = StyleSheet.create({
     color: '#1a1a1a',
     fontWeight: 'bold',
     marginVertical: 16,
-  }
+  },
+  // --- Student styles ---
+  editRow: {
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+    marginBottom: 4,
+  },
+  editLabel: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#aaa',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: 6,
+  },
+  editValueRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  editValue: {
+    fontSize: 15,
+    color: '#1a1a1a',
+    flex: 1,
+  },
+  editLink: {
+    fontSize: 13,
+    color: '#888888',
+    fontWeight: '600',
+    paddingLeft: 16,
+  },
+  editInputWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  semesterGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginTop: 4,
+  },
+  semPill: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    borderWidth: 1,
+    borderColor: '#e5e5e5',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#fafaf8',
+  },
+  semPillActive: {
+    backgroundColor: '#1a1a1a',
+    borderColor: '#1a1a1a',
+  },
+  semPillText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#888',
+  },
+  semPillTextActive: {
+    color: '#fafaf8',
+  },
+  listRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  listPrimary: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#1a1a1a',
+    marginBottom: 2,
+  },
+  listSecondary: {
+    fontSize: 13,
+    color: '#888888',
+  },
+  listTime: {
+    fontSize: 12,
+    color: '#aaa',
+    paddingLeft: 8,
+  },
+  statusPill: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 4,
+    borderWidth: 1,
+  },
+  statusPillText: {
+    fontSize: 10,
+    fontWeight: '700',
+  },
+  emptyState: {
+    fontSize: 14,
+    color: '#aaa',
+    fontStyle: 'italic',
+    paddingVertical: 4,
+  },
+  signOutBtn: {
+    alignItems: 'center',
+    paddingVertical: 20,
+    marginTop: 4,
+  },
+  signOutText: {
+    fontSize: 14,
+    color: '#888888',
+    fontWeight: '500',
+  },
 });
