@@ -1,7 +1,8 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Animated, ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, Switch } from 'react-native';
 import { useAuth } from '../../context/AuthContext';
 import { useProfile } from '../../context/UserContext';
+import { useTheme } from '../../context/ThemeContext';
 import { useRouter } from 'expo-router';
 import { collection, query, where, orderBy, onSnapshot } from 'firebase/firestore';
 import { firestore } from '../../services/firebase';
@@ -16,7 +17,9 @@ const STATUSES = [
 export default function ProfileTab() {
   const { user, role, logout } = useAuth();
   const { profile, updateProfile, refreshProfile } = useProfile();
+  const { colors } = useTheme();
   const router = useRouter();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
 
   const [fetchTimeout, setFetchTimeout] = useState(false);
 
@@ -593,16 +596,16 @@ export default function ProfileTab() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fafaf8',
+    backgroundColor: colors.background,
   },
   centerContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fafaf8',
+    backgroundColor: colors.background,
     padding: 24,
   },
   scrollContent: {
@@ -616,17 +619,17 @@ const styles = StyleSheet.create({
   appLogo: {
     fontSize: 28,
     fontWeight: '800',
-    color: '#1a1a1a',
+    color: colors.text,
     marginBottom: 6,
     letterSpacing: -0.5,
   },
   guestMessage: {
     fontSize: 14,
-    color: '#888',
+    color: colors.textMuted,
     marginBottom: 32,
   },
   primaryBtn: {
-    backgroundColor: '#1a1a1a',
+    backgroundColor: colors.primary,
     width: '100%',
     paddingVertical: 14,
     borderRadius: 6,
@@ -634,7 +637,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   primaryBtnText: {
-    color: '#fafaf8',
+    color: colors.primaryText,
     fontSize: 15,
     fontWeight: '700',
   },
@@ -643,11 +646,11 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: 6,
     borderWidth: 1,
-    borderColor: '#e5e5e5',
+    borderColor: colors.border,
     alignItems: 'center',
   },
   outlineBtnText: {
-    color: '#1a1a1a',
+    color: colors.text,
     fontSize: 15,
     fontWeight: '600',
   },
@@ -658,7 +661,7 @@ const styles = StyleSheet.create({
   greeting: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#aaa',
+    color: colors.textVeryMuted,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
     marginBottom: 4,
@@ -666,16 +669,16 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 24,
     fontWeight: '800',
-    color: '#1a1a1a',
+    color: colors.text,
   },
   meta: {
     fontSize: 14,
-    color: '#555555',
+    color: colors.textSubtle,
     marginTop: 4,
   },
   card: {
     borderWidth: 1,
-    borderColor: '#ebebeb',
+    borderColor: colors.cardBorder,
     borderRadius: 6,
     padding: 16,
     marginBottom: 16,
@@ -683,14 +686,14 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 10,
     fontWeight: '700',
-    color: '#aaa',
+    color: colors.textVeryMuted,
     letterSpacing: 1,
     textTransform: 'uppercase',
     marginBottom: 12,
   },
   cardSubtitle: {
     fontSize: 13,
-    color: '#888',
+    color: colors.textMuted,
     marginBottom: 16,
   },
   statusGrid: {
@@ -703,25 +706,25 @@ const styles = StyleSheet.create({
     flexBasis: '48%',
     paddingVertical: 14,
     borderWidth: 1,
-    borderColor: '#e5e5e5',
+    borderColor: colors.border,
     borderRadius: 6,
     alignItems: 'center',
   },
   statusBtnActive: {
-    backgroundColor: '#1a1a1a',
-    borderColor: '#1a1a1a',
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
   },
   statusBtnText: {
-    color: '#888',
+    color: colors.textMuted,
     fontWeight: '600',
     fontSize: 13,
   },
   statusBtnTextActive: {
-    color: '#fafaf8',
+    color: colors.primaryText,
   },
   staticEmail: {
     fontSize: 13,
-    color: '#888',
+    color: colors.textMuted,
     marginTop: 2,
     fontWeight: '500',
   },
@@ -731,17 +734,17 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   inputField: {
-    backgroundColor: '#fafaf8',
+    backgroundColor: colors.inputBg,
     borderWidth: 1,
-    borderColor: '#e5e5e5',
+    borderColor: colors.border,
     borderRadius: 8,
     paddingHorizontal: 16,
     paddingVertical: 12,
     fontSize: 14,
-    color: '#1a1a1a',
+    color: colors.text,
   },
   inlineActionBtn: {
-    backgroundColor: '#1a1a1a',
+    backgroundColor: colors.primary,
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderRadius: 8,
@@ -749,7 +752,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   inlineActionText: {
-    color: '#fafaf8',
+    color: colors.primaryText,
     fontWeight: 'bold',
     fontSize: 13,
   },
@@ -762,7 +765,7 @@ const styles = StyleSheet.create({
   toggleLabel: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#555',
+    color: colors.textSubtle,
   },
   gridRow: {
     flexDirection: 'row',
@@ -773,34 +776,34 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 12,
     borderWidth: 1,
-    borderColor: '#e5e5e5',
+    borderColor: colors.border,
     borderRadius: 8,
     alignItems: 'center',
-    backgroundColor: '#fafaf8',
+    backgroundColor: colors.surface,
   },
   segmentBtnActive: {
-    backgroundColor: '#1a1a1a',
-    borderColor: '#1a1a1a',
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
   },
   segmentBtnText: {
-    color: '#888',
+    color: colors.textMuted,
     fontWeight: '600',
     fontSize: 13,
   },
   segmentBtnTextActive: {
-    color: '#fafaf8',
+    color: colors.primaryText,
   },
   chipBtn: {
-    backgroundColor: '#fafaf8',
+    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: '#e5e5e5',
+    borderColor: colors.border,
     borderRadius: 16,
     paddingHorizontal: 14,
     paddingVertical: 8,
     marginRight: 8,
   },
   chipText: {
-    color: '#555',
+    color: colors.textSubtle,
     fontSize: 12,
     fontWeight: '500',
   },
@@ -808,25 +811,25 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#fafaf8',
+    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: '#e5e5e5',
+    borderColor: colors.border,
     borderRadius: 8,
     padding: 12,
     marginBottom: 8,
   },
   ohDay: {
     fontWeight: 'bold',
-    color: '#1a1a1a',
+    color: colors.text,
     fontSize: 14,
   },
   ohTime: {
-    color: '#555555',
+    color: colors.textSubtle,
     fontSize: 13,
     marginTop: 2,
   },
   delText: {
-    color: '#888888',
+    color: colors.textMuted,
     fontWeight: 'bold',
     fontSize: 12,
   },
@@ -836,7 +839,7 @@ const styles = StyleSheet.create({
   },
   floatingSuccess: {
     textAlign: 'center',
-    color: '#1a1a1a',
+    color: colors.text,
     fontWeight: 'bold',
     marginVertical: 16,
   },
@@ -844,13 +847,13 @@ const styles = StyleSheet.create({
   editRow: {
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: colors.borderLight,
     marginBottom: 4,
   },
   editLabel: {
     fontSize: 11,
     fontWeight: '600',
-    color: '#aaa',
+    color: colors.textVeryMuted,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
     marginBottom: 6,
@@ -862,12 +865,12 @@ const styles = StyleSheet.create({
   },
   editValue: {
     fontSize: 15,
-    color: '#1a1a1a',
+    color: colors.text,
     flex: 1,
   },
   editLink: {
     fontSize: 13,
-    color: '#888888',
+    color: colors.textMuted,
     fontWeight: '600',
     paddingLeft: 16,
   },
@@ -887,43 +890,43 @@ const styles = StyleSheet.create({
     height: 42,
     borderRadius: 21,
     borderWidth: 1,
-    borderColor: '#e5e5e5',
+    borderColor: colors.border,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#fafaf8',
+    backgroundColor: colors.surface,
   },
   semPillActive: {
-    backgroundColor: '#1a1a1a',
-    borderColor: '#1a1a1a',
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
   },
   semPillText: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#888',
+    color: colors.textMuted,
   },
   semPillTextActive: {
-    color: '#fafaf8',
+    color: colors.primaryText,
   },
   listRow: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: colors.borderLight,
   },
   listPrimary: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#1a1a1a',
+    color: colors.text,
     marginBottom: 2,
   },
   listSecondary: {
     fontSize: 13,
-    color: '#888888',
+    color: colors.textMuted,
   },
   listTime: {
     fontSize: 12,
-    color: '#aaa',
+    color: colors.textVeryMuted,
     paddingLeft: 8,
   },
   statusPill: {
@@ -938,7 +941,7 @@ const styles = StyleSheet.create({
   },
   emptyState: {
     fontSize: 14,
-    color: '#aaa',
+    color: colors.textVeryMuted,
     fontStyle: 'italic',
     paddingVertical: 4,
   },
@@ -949,7 +952,7 @@ const styles = StyleSheet.create({
   },
   signOutText: {
     fontSize: 14,
-    color: '#888888',
+    color: colors.textMuted,
     fontWeight: '500',
   },
 });

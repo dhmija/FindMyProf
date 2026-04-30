@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import { Tabs, useRouter } from "expo-router";
 import { useAuth } from "../../context/AuthContext";
-import { View, StyleSheet } from "react-native";
+import { useTheme } from "../../context/ThemeContext";
+import { TouchableOpacity, View } from "react-native";
 import { Feather } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AuthGateSheet from "../../components/AuthGateSheet";
 
 export default function TabsLayout() {
   const { user } = useAuth();
+  const { colors, isDark, toggleTheme } = useTheme();
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
@@ -32,6 +34,20 @@ export default function TabsLayout() {
     setPendingRoute(null);
   };
 
+  const ThemeToggle = () => (
+    <TouchableOpacity
+      onPress={toggleTheme}
+      style={{ marginRight: 16, padding: 4 }}
+      hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+    >
+      <Feather
+        name={isDark ? 'sun' : 'moon'}
+        size={18}
+        color={colors.textMuted}
+      />
+    </TouchableOpacity>
+  );
+
   return (
     <>
       <Tabs
@@ -39,22 +55,24 @@ export default function TabsLayout() {
           headerShown: true,
           headerTitleAlign: 'center',
           headerStyle: {
+            backgroundColor: colors.surface,
             borderBottomWidth: 1,
-            borderBottomColor: '#f0f0f0',
+            borderBottomColor: colors.border,
             elevation: 0,
             shadowOpacity: 0,
           },
           headerTitleStyle: {
             fontSize: 16,
             fontWeight: '700',
-            color: '#1a1a1a',
+            color: colors.text,
           },
-          tabBarActiveTintColor: '#1a1a1a',
-          tabBarInactiveTintColor: '#aaa',
+          headerRight: () => <ThemeToggle />,
+          tabBarActiveTintColor: colors.text,
+          tabBarInactiveTintColor: colors.textMuted,
           tabBarStyle: {
-            backgroundColor: '#fafaf8',
+            backgroundColor: colors.tabBar,
             borderTopWidth: 1,
-            borderTopColor: '#e5e5e5',
+            borderTopColor: colors.border,
             elevation: 0,
             height: 60 + insets.bottom,
             paddingBottom: 8 + insets.bottom,

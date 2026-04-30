@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator, Linking } from 'react-native';
 import { useLocalSearchParams, useRouter, useNavigation } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -11,14 +11,17 @@ import { useAuth } from '../../../context/AuthContext';
 import { sendQuickNotify } from '../../../services/chatService';
 import { requestBooking } from '../../../services/bookingService';
 import { useProfile } from '../../../context/UserContext';
+import { useTheme } from '../../../context/ThemeContext';
 
 export default function DirectoryDetail() {
   const { id } = useLocalSearchParams();
   const { user, role } = useAuth();
   const { profile } = useProfile();
+  const { colors } = useTheme();
   const router = useRouter();
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   
   const [faculty, setFaculty] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -286,10 +289,10 @@ export default function DirectoryDetail() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fafaf8',
+    backgroundColor: colors.background,
   },
   scrollContent: {
     padding: 16,
@@ -299,7 +302,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fafaf8',
+    backgroundColor: colors.background,
   },
   headerBlock: {
     flexDirection: 'row',
@@ -314,12 +317,12 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 24,
     fontWeight: '800',
-    color: '#1a1a1a',
+    color: colors.text,
     lineHeight: 28,
   },
   department: {
     fontSize: 14,
-    color: '#888',
+    color: colors.textMuted,
     marginTop: 4,
   },
   flatInfoContainer: {
@@ -328,7 +331,7 @@ const styles = StyleSheet.create({
   // Section card
   card: {
     borderWidth: 1,
-    borderColor: '#ebebeb',
+    borderColor: colors.cardBorder,
     borderRadius: 6,
     padding: 16,
     marginBottom: 12,
@@ -336,7 +339,7 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 10,
     fontWeight: '700',
-    color: '#aaa',
+    color: colors.textVeryMuted,
     letterSpacing: 1,
     textTransform: 'uppercase',
     marginBottom: 12,
@@ -345,7 +348,7 @@ const styles = StyleSheet.create({
   unregisteredBanner: {
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: colors.borderLight,
     marginBottom: 12,
   },
   infoRow: {
@@ -353,29 +356,29 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#e5e5e5',
+    borderBottomColor: colors.border,
   },
   label: {
     width: 80,
     fontSize: 13,
     fontWeight: '600',
-    color: '#888',
+    color: colors.textMuted,
   },
   value: {
     fontSize: 14,
-    color: '#1a1a1a',
+    color: colors.text,
     flex: 1,
   },
   // Buttons
   primaryButton: {
-    backgroundColor: '#1a1a1a',
+    backgroundColor: colors.primary,
     padding: 14,
     borderRadius: 6,
     alignItems: 'center',
     marginTop: 12,
   },
   primaryButtonText: {
-    color: '#fafaf8',
+    color: colors.primaryText,
     fontWeight: '700',
     fontSize: 14,
   },
@@ -395,24 +398,24 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   msgButton: {
-    backgroundColor: '#1a1a1a',
+    backgroundColor: colors.primary,
   },
   notifyButton: {
     backgroundColor: 'transparent',
     borderWidth: 1,
-    borderColor: '#1a1a1a',
+    borderColor: colors.primary,
   },
   // Notices
   noticeBanner: {
-    backgroundColor: '#fafaf8',
+    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: '#e8e8e8',
+    borderColor: colors.border,
     padding: 12,
     borderRadius: 6,
     marginBottom: 12,
   },
   noticeText: {
-    color: '#555555',
+    color: colors.textSubtle,
     fontSize: 13,
   },
   // Office hours slots
@@ -422,26 +425,26 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#e5e5e5',
+    borderBottomColor: colors.border,
   },
   slotText: {
     fontSize: 13,
-    color: '#1a1a1a',
+    color: colors.text,
     flex: 1,
     paddingRight: 10,
   },
   slotTextMuted: {
-    color: '#ccc',
+    color: colors.placeholder,
     textDecorationLine: 'line-through',
   },
   bookButton: {
     paddingHorizontal: 12,
     paddingVertical: 6,
-    backgroundColor: '#1a1a1a',
+    backgroundColor: colors.primary,
     borderRadius: 4,
   },
   bookText: {
-    color: '#fafaf8',
+    color: colors.primaryText,
     fontWeight: '600',
     fontSize: 12,
   },
@@ -450,11 +453,11 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: 4,
     borderWidth: 1,
-    borderColor: '#e5e5e5',
+    borderColor: colors.border,
   },
   bookedText: {
     fontSize: 11,
-    color: '#ccc',
+    color: colors.placeholder,
     fontWeight: '600',
   },
   // Subjects
@@ -465,23 +468,23 @@ const styles = StyleSheet.create({
   },
   pill: {
     borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderColor: colors.border,
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: 4,
   },
   pillText: {
-    color: '#555',
+    color: colors.textSubtle,
     fontSize: 12,
     fontWeight: '500',
   },
   mutedText: {
-    color: '#ccc',
+    color: colors.placeholder,
     fontSize: 13,
     fontStyle: 'italic',
   },
   errorText: {
-    color: '#999',
+    color: colors.textMuted,
     fontSize: 14,
   },
 });

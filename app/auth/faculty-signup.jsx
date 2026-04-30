@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Animated, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
 import { useAuth } from "../../context/AuthContext";
+import { useTheme } from "../../context/ThemeContext";
 import { signUp } from "../../services/authService";
 import { claimFacultyProfile, updateFacultyProfile, getFacultyByEmail } from "../../services/facultyService";
 import { setDoc, doc } from "firebase/firestore";
@@ -9,7 +10,9 @@ import { Link, useRouter } from "expo-router";
 
 export default function FacultySignupScreen() {
   const { setSessionRole } = useAuth();
+  const { colors } = useTheme();
   const router = useRouter();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -97,9 +100,9 @@ export default function FacultySignupScreen() {
   };
 
   return (
-    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
+    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1, backgroundColor: colors.background }}>
       <Animated.ScrollView 
-        style={{ flex: 1, backgroundColor: '#fafaf8', opacity: fadeAnim }} 
+        style={{ flex: 1, backgroundColor: colors.background, opacity: fadeAnim }} 
         contentContainerStyle={[styles.container, { flexGrow: 1 }]}
         keyboardShouldPersistTaps="handled"
       >
@@ -155,7 +158,7 @@ export default function FacultySignupScreen() {
       />
 
       <TouchableOpacity style={styles.btn} onPress={handleSignup} disabled={loading}>
-        {loading ? <ActivityIndicator color="#fafaf8" /> : <Text style={styles.btnText}>Register Faculty Profile</Text>}
+        {loading ? <ActivityIndicator color={colors.primaryText} /> : <Text style={styles.btnText}>Register Faculty Profile</Text>}
       </TouchableOpacity>
       
       <View style={styles.linkContainer}>
@@ -168,59 +171,59 @@ export default function FacultySignupScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors) => StyleSheet.create({
   container: {
     padding: 24,
     paddingTop: 60,
     paddingBottom: 60,
-    backgroundColor: '#fafaf8',
+    backgroundColor: colors.background,
   },
   title: {
     fontSize: 24,
     fontWeight: '800',
-    color: '#1a1a1a',
+    color: colors.text,
     textAlign: 'center',
     marginBottom: 6,
     letterSpacing: -0.5,
   },
   subtitle: {
     fontSize: 14,
-    color: '#aaa',
+    color: colors.textVeryMuted,
     textAlign: 'center',
     marginBottom: 28,
   },
   errorContainer: {
     borderWidth: 1,
-    borderColor: '#e5e5e5',
+    borderColor: colors.border,
     borderRadius: 4,
     padding: 10,
     marginBottom: 16,
   },
   errorText: {
-    color: '#888',
+    color: colors.textMuted,
     fontSize: 13,
     textAlign: 'center',
   },
   input: {
     fontSize: 15,
-    color: '#1a1a1a',
+    color: colors.text,
     borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderColor: colors.border,
     borderRadius: 6,
     paddingHorizontal: 14,
     paddingVertical: 12,
     marginBottom: 12,
-    backgroundColor: '#fafaf8',
+    backgroundColor: colors.inputBg,
   },
   btn: {
-    backgroundColor: '#1a1a1a',
+    backgroundColor: colors.primary,
     paddingVertical: 14,
     borderRadius: 6,
     alignItems: 'center',
     marginTop: 4,
   },
   btnText: {
-    color: '#fafaf8',
+    color: colors.primaryText,
     fontSize: 15,
     fontWeight: '700',
   },
@@ -232,8 +235,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
   },
   link: {
-    color: '#888',
+    color: colors.textMuted,
     fontSize: 14,
   },
 });
-

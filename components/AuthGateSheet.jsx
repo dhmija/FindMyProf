@@ -1,11 +1,14 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Animated, Modal, TouchableWithoutFeedback } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useTheme } from '../context/ThemeContext';
 
 export default function AuthGateSheet({ visible, onClose, actionMessage, returnTo }) {
   const slideAnim = useRef(new Animated.Value(400)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const router = useRouter();
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
 
   // We track local visibility to allow out-animation before unmounting fully
   const [internalVisible, setInternalVisible] = useState(false);
@@ -95,17 +98,17 @@ export default function AuthGateSheet({ visible, onClose, actionMessage, returnT
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors) => StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.55)',
+    backgroundColor: colors.overlay,
   },
   sheetContainer: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: '#fafaf8',
+    backgroundColor: colors.surface,
     borderTopLeftRadius: 10,
     borderTopRightRadius: 10,
     padding: 24,
@@ -114,7 +117,7 @@ const styles = StyleSheet.create({
   handleBar: {
     width: 32,
     height: 3,
-    backgroundColor: '#e0e0e0',
+    backgroundColor: colors.border,
     borderRadius: 2,
     alignSelf: 'center',
     marginBottom: 18,
@@ -128,30 +131,30 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#1a1a1a',
+    color: colors.text,
   },
   closeBtn: {
     padding: 4,
   },
   closeBtnText: {
     fontSize: 14,
-    color: '#aaa',
+    color: colors.textVeryMuted,
   },
   message: {
     fontSize: 14,
-    color: '#888',
+    color: colors.textMuted,
     lineHeight: 20,
     marginBottom: 20,
   },
   loginBtn: {
-    backgroundColor: '#1a1a1a',
+    backgroundColor: colors.primary,
     paddingVertical: 14,
     borderRadius: 6,
     alignItems: 'center',
     marginBottom: 10,
   },
   loginBtnText: {
-    color: '#fafaf8',
+    color: colors.primaryText,
     fontSize: 15,
     fontWeight: '700',
   },
@@ -164,13 +167,12 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 6,
     borderWidth: 1,
-    borderColor: '#d5d5d5',
+    borderColor: colors.border,
     alignItems: 'center',
   },
   signupBtnText: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#555',
+    color: colors.textSubtle,
   },
 });
-

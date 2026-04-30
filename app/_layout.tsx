@@ -3,7 +3,8 @@ import { View, Text, StyleSheet } from "react-native";
 import { Slot, useRouter, useSegments } from "expo-router";
 import { AuthProvider, useAuth } from "../context/AuthContext";
 import { UserProvider } from "../context/UserContext";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import { ThemeProvider, useTheme } from "../context/ThemeContext";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 
 function RootNavigation() {
@@ -38,18 +39,20 @@ function RootNavigation() {
     }
   }, [user, loading, segments]);
 
+  const { colors, isDark } = useTheme();
+
   if (loading || splashVisible) {
     return (
-      <View style={styles.splashContainer}>
-        <Text style={styles.splashTitle}>FindMyProf</Text>
-        <Text style={styles.splashSubtitle}>faculty directory</Text>
+      <View style={[styles.splashContainer, { backgroundColor: colors.background }]}>
+        <Text style={[styles.splashTitle, { color: colors.text }]}>FindMyProf</Text>
+        <Text style={[styles.splashSubtitle, { color: colors.textMuted }]}>faculty directory</Text>
       </View>
     );
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#fafaf8' }}>
-      <StatusBar style="auto" />
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
+      <StatusBar style={isDark ? 'light' : 'dark'} />
       <Slot />
     </View>
   );
@@ -58,11 +61,13 @@ function RootNavigation() {
 export default function Layout() {
   return (
     <SafeAreaProvider>
-      <AuthProvider>
-        <UserProvider>
-          <RootNavigation />
-        </UserProvider>
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <UserProvider>
+            <RootNavigation />
+          </UserProvider>
+        </AuthProvider>
+      </ThemeProvider>
     </SafeAreaProvider>
   );
 }

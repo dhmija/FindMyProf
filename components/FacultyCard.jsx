@@ -1,10 +1,13 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useTheme } from '../context/ThemeContext';
 
 const FacultyCard = React.memo(({ faculty }) => {
   const router = useRouter();
+  const { colors } = useTheme();
   const pulseAnim = useRef(new Animated.Value(1)).current;
+  const styles = useMemo(() => makeStyles(colors), [colors]);
 
   const { id, name, department, isRegistered, status } = faculty;
 
@@ -69,13 +72,13 @@ const FacultyCard = React.memo(({ faculty }) => {
   );
 });
 
-const styles = StyleSheet.create({
+const makeStyles = (colors) => StyleSheet.create({
   card: {
-    backgroundColor: '#fafaf8',
+    backgroundColor: colors.surface,
     paddingVertical: 14,
     paddingHorizontal: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#e5e5e5',
+    borderBottomColor: colors.border,
   },
   header: {
     flexDirection: 'row',
@@ -86,18 +89,18 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#1a1a1a',
+    color: colors.text,
     flex: 1,
     paddingRight: 8,
   },
   department: {
     fontSize: 13,
-    color: '#888',
+    color: colors.textMuted,
     marginBottom: 5,
   },
   location: {
     fontSize: 12,
-    color: '#bbb',
+    color: colors.textVeryMuted,
     letterSpacing: 0.1,
   },
   badge: {
@@ -108,17 +111,17 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   badgeFilled: {
-    backgroundColor: '#1a1a1a',
+    backgroundColor: colors.primary,
   },
   badgeOutline: {
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: colors.border,
   },
   dot: {
     width: 5,
     height: 5,
     borderRadius: 3,
-    backgroundColor: '#fafaf8',
+    backgroundColor: colors.primaryText,
     marginRight: 4,
   },
   badgeText: {
@@ -126,14 +129,14 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   badgeTextFilled: {
-    color: '#fafaf8',
+    color: colors.primaryText,
   },
   badgeTextOutline: {
-    color: '#888',
+    color: colors.textMuted,
   },
   unregisteredLabel: {
     fontSize: 11,
-    color: '#ccc',
+    color: colors.textVeryMuted,
   },
 });
 

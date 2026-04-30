@@ -1,10 +1,13 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView } from 'react-native';
 import { useRouter } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
+import { useTheme } from '../context/ThemeContext';
 
 export default function OnboardingScreen() {
   const router = useRouter();
+  const { colors } = useTheme();
+  const styles = makeStyles(colors);
 
   const handleComplete = async () => {
     await SecureStore.setItemAsync('hasSeenOnboarding', 'true');
@@ -37,10 +40,10 @@ export default function OnboardingScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fafaf8',
+    backgroundColor: colors.background,
   },
   content: {
     flex: 1,
@@ -50,47 +53,47 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#1a1a1a',
+    color: colors.text,
     marginBottom: 8,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
-    color: '#555555',
+    color: colors.textSubtle,
     marginBottom: 40,
     textAlign: 'center',
   },
   card: {
-    backgroundColor: '#fafaf8',
+    backgroundColor: colors.surface,
     padding: 20,
     borderRadius: 12,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: '#E0E0E0',
+    borderColor: colors.border,
   },
   roleHeader: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#1a1a1a',
+    color: colors.text,
     marginBottom: 8,
   },
   roleDesc: {
     fontSize: 14,
-    color: '#555',
+    color: colors.textSubtle,
     lineHeight: 20,
   },
   spacer: {
     flex: 1,
   },
   continueBtn: {
-    backgroundColor: '#1a1a1a',
+    backgroundColor: colors.primary,
     paddingVertical: 18,
     borderRadius: 12,
     alignItems: 'center',
   },
   continueBtnText: {
-    color: '#fafaf8',
+    color: colors.primaryText,
     fontSize: 18,
     fontWeight: 'bold',
-  }
+  },
 });

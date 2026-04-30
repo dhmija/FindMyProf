@@ -1,10 +1,12 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Animated, KeyboardAvoidingView, Platform, ScrollView } from "react-native";
 import { useAuth } from "../../context/AuthContext";
+import { useTheme } from "../../context/ThemeContext";
 import { Link, useLocalSearchParams, useRouter } from "expo-router";
 
 export default function LoginScreen() {
   const { login } = useAuth();
+  const { colors } = useTheme();
   const { returnTo } = useLocalSearchParams();
   const router = useRouter();
 
@@ -15,6 +17,7 @@ export default function LoginScreen() {
   const [error, setError] = useState("");
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
+  const styles = useMemo(() => makeStyles(colors), [colors]);
 
   useEffect(() => {
     Animated.timing(fadeAnim, { toValue: 1, duration: 500, useNativeDriver: true }).start();
@@ -41,9 +44,9 @@ export default function LoginScreen() {
   };
 
   return (
-    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
+    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1, backgroundColor: colors.background }}>
       <Animated.ScrollView 
-        style={{ flex: 1, backgroundColor: '#fafaf8', opacity: fadeAnim }} 
+        style={{ flex: 1, backgroundColor: colors.background, opacity: fadeAnim }} 
         contentContainerStyle={[styles.container, { flexGrow: 1 }]}
         keyboardShouldPersistTaps="handled"
       >
@@ -55,7 +58,7 @@ export default function LoginScreen() {
         <TextInput
           style={styles.input}
           placeholder="College email"
-          placeholderTextColor="#bbb"
+          placeholderTextColor={colors.placeholder}
           autoCapitalize="none"
           keyboardType="email-address"
           returnKeyType="next"
@@ -65,7 +68,7 @@ export default function LoginScreen() {
         <TextInput
           style={styles.input}
           placeholder="Password"
-          placeholderTextColor="#bbb"
+          placeholderTextColor={colors.placeholder}
           secureTextEntry
           returnKeyType="done"
           value={password}
@@ -89,7 +92,7 @@ export default function LoginScreen() {
         </View>
 
         <TouchableOpacity style={[styles.btn, loading && styles.btnDisabled]} onPress={handleLogin} disabled={loading}>
-          {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.btnText}>Login</Text>}
+          {loading ? <ActivityIndicator color={colors.primaryText} /> : <Text style={styles.btnText}>Login</Text>}
         </TouchableOpacity>
 
         <View style={styles.links}>
@@ -105,51 +108,51 @@ export default function LoginScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors) => StyleSheet.create({
   container: {
     flex: 1,
     padding: 24,
     justifyContent: 'center',
-    backgroundColor: '#fafaf8',
+    backgroundColor: colors.background,
   },
   title: {
     fontSize: 28,
     fontWeight: '800',
-    color: '#1a1a1a',
+    color: colors.text,
     textAlign: 'center',
     marginBottom: 6,
     letterSpacing: -0.5,
   },
   subtitle: {
     fontSize: 14,
-    color: '#aaa',
+    color: colors.textVeryMuted,
     textAlign: 'center',
     marginBottom: 32,
   },
   error: {
     fontSize: 13,
-    color: '#888',
+    color: colors.textMuted,
     textAlign: 'center',
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: '#e5e5e5',
+    borderColor: colors.border,
     borderRadius: 4,
     padding: 10,
   },
   input: {
     fontSize: 15,
-    color: '#1a1a1a',
+    color: colors.text,
     borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderColor: colors.border,
     borderRadius: 6,
     paddingHorizontal: 14,
     paddingVertical: 12,
     marginBottom: 12,
-    backgroundColor: '#fafaf8',
+    backgroundColor: colors.inputBg,
   },
   roleLabel: {
     fontSize: 12,
-    color: '#aaa',
+    color: colors.textVeryMuted,
     fontWeight: '600',
     letterSpacing: 0.5,
     textTransform: 'uppercase',
@@ -165,33 +168,33 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 11,
     borderWidth: 1,
-    borderColor: '#d5d5d5',
+    borderColor: colors.border,
     borderRadius: 6,
     alignItems: 'center',
   },
   rolePillActive: {
-    backgroundColor: '#1a1a1a',
-    borderColor: '#1a1a1a',
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
   },
   rolePillText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#888',
+    color: colors.textMuted,
   },
   rolePillTextActive: {
-    color: '#fafaf8',
+    color: colors.primaryText,
   },
   btn: {
-    backgroundColor: '#1a1a1a',
+    backgroundColor: colors.primary,
     paddingVertical: 14,
     borderRadius: 6,
     alignItems: 'center',
   },
   btnDisabled: {
-    backgroundColor: '#ccc',
+    backgroundColor: colors.fill,
   },
   btnText: {
-    color: '#fafaf8',
+    color: colors.primaryText,
     fontSize: 15,
     fontWeight: '700',
   },
@@ -202,6 +205,6 @@ const styles = StyleSheet.create({
   },
   link: {
     fontSize: 14,
-    color: '#888',
+    color: colors.textMuted,
   },
 });

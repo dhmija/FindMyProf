@@ -1,15 +1,18 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { collection, query, where, onSnapshot, orderBy } from 'firebase/firestore';
 import { firestore } from '../../../services/firebase';
 import { useAuth } from '../../../context/AuthContext';
+import { useTheme } from '../../../context/ThemeContext';
 import { updateBookingStatus } from '../../../services/bookingService';
 
 export default function OfficeHoursBookingIndex() {
   const { user, role } = useAuth();
+  const { colors } = useTheme();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [actingOn, setActingOn] = useState(null); // tracking ID of booking being parsed
+  const [actingOn, setActingOn] = useState(null);
+  const styles = useMemo(() => makeStyles(colors), [colors]);
 
   useEffect(() => {
     if (!user?.uid || !role) return;
@@ -70,12 +73,12 @@ export default function OfficeHoursBookingIndex() {
     }
   };
 
-  const getStatusColor = (status) => {
+  const getStatusConfig = (status) => {
     switch (status) {
-      case 'confirmed': return { bg: '#1a1a1a', text: '#fafaf8' };
-      case 'cancelled': return { bg: '#f0f0f0', text: '#555555' };
-      case 'pending':   return { bg: '#fafaf8', text: '#888888', border: '#d0d0d0' };
-      default:          return { bg: '#f0f0f0', text: '#888888' };
+      case 'confirmed': return { bg: colors.primary,  text: colors.primaryText,  border: colors.primary };
+      case 'cancelled': return { bg: colors.fill,     text: colors.textSubtle,   border: colors.fill };
+      case 'pending':   return { bg: colors.surface,  text: colors.textMuted,    border: colors.border };
+      default:          return { bg: colors.fill,     text: colors.textMuted,    border: colors.fill };
     }
   };
 
@@ -87,10 +90,10 @@ export default function OfficeHoursBookingIndex() {
         <View style={styles.cardHeader}>
           <Text style={styles.personName}>{isStudent ? item.facultyName : item.studentName}</Text>
           <View style={[styles.statusBadge, { 
-            backgroundColor: getStatusColor(item.status).bg,
-            borderColor: getStatusColor(item.status).border || getStatusColor(item.status).bg,
+            backgroundColor: getStatusConfig(item.status).bg,
+            borderColor: getStatusConfig(item.status).border,
           }]}>
-             <Text style={[styles.statusText, { color: getStatusColor(item.status).text }]}>{item.status.toUpperCase()}</Text>
+             <Text style={[styles.statusText, { color: getStatusConfig(item.status).text }]}>{item.status.toUpperCase()}</Text>
           </View>
         </View>
 
@@ -104,7 +107,7 @@ export default function OfficeHoursBookingIndex() {
                disabled={actingOn === item.id}
                onPress={() => handleUpdateStatus(item.id, 'confirmed')}
             >
-              {actingOn === item.id ? <ActivityIndicator size="small" color="#fafaf8"/> : <Text style={styles.confirmBtnText}>Confirm</Text>}
+              {actingOn === item.id ? <ActivityIndicator size="small" color={colors.primaryText}/> : <Text style={styles.confirmBtnText}>Confirm</Text>}
             </TouchableOpacity>
             
             <TouchableOpacity 
@@ -136,7 +139,7 @@ export default function OfficeHoursBookingIndex() {
   if (loading) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#1a1a1a" />
+        <ActivityIndicator size="large" color={colors.text} />
       </View>
     );
   }
@@ -158,10 +161,10 @@ export default function OfficeHoursBookingIndex() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fafaf8',
+    backgroundColor: colors.background,
   },
   centerContainer: {
     flex: 1,
@@ -173,13 +176,13 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   bookingCard: {
-    backgroundColor: '#fafaf8',
+    backgroundColor: colors.surface,
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
-    shadowColor: '#1a1a1a',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
+    shadowOpacity: 0.06,
     shadowRadius: 2,
     elevation: 2,
   },
@@ -192,7 +195,7 @@ const styles = StyleSheet.create({
   personName: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#1a1a1a',
+    color: colors.text,
     flex: 1,
   },
   statusBadge: {
@@ -207,7 +210,7 @@ const styles = StyleSheet.create({
   },
   slotDetails: {
     fontSize: 14,
-    color: '#555',
+    color: colors.textSubtle,
   },
   actionRow: {
     flexDirection: 'row',
@@ -222,23 +225,23 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   confirmBtn: {
-    backgroundColor: '#1a1a1a',
+    backgroundColor: colors.primary,
   },
   cancelBtn: {
-    backgroundColor: '#f0f0f0',
+    backgroundColor: colors.fill,
   },
   confirmBtnText: {
-    color: '#fafaf8',
+    color: colors.primaryText,
     fontWeight: 'bold',
     fontSize: 13,
   },
   cancelBtnText: {
-    color: '#555555',
+    color: colors.textSubtle,
     fontWeight: 'bold',
     fontSize: 13,
   },
   emptyText: {
-    color: '#999',
+    color: colors.textMuted,
     fontStyle: 'italic',
-  }
+  },
 });

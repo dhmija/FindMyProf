@@ -1,19 +1,22 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { View, Text, StyleSheet, FlatList, TextInput, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { collection, onSnapshot, query } from 'firebase/firestore';
 import { firestore } from '../../../services/firebase';
+import { useTheme } from '../../../context/ThemeContext';
 import FacultyCard from '../../../components/FacultyCard';
 
 const BLOCKS = ['All', 'M', 'N1', 'N2'];
 const FLOORS = ['1', '2', '3'];
 
 export default function DirectoryIndex() {
+  const { colors } = useTheme();
   const [faculties, setFaculties] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchText, setSearchText] = useState('');
-
   const [filterBlock, setFilterBlock] = useState('All');
   const [filterFloor, setFilterFloor] = useState(null);
+
+  const styles = useMemo(() => makeStyles(colors), [colors]);
 
   useEffect(() => {
     setLoading(true);
@@ -112,7 +115,7 @@ export default function DirectoryIndex() {
 
       {loading && faculties.length === 0 ? (
         <View style={styles.center}>
-          <ActivityIndicator size="large" color="#1a1a1a" />
+          <ActivityIndicator size="large" color={colors.text} />
           <Text style={styles.loadingText}>Loading directory…</Text>
         </View>
       ) : (
@@ -137,10 +140,10 @@ export default function DirectoryIndex() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fafaf8',
+    backgroundColor: colors.background,
   },
   searchRow: {
     paddingHorizontal: 16,
@@ -149,13 +152,13 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     fontSize: 15,
-    color: '#1a1a1a',
+    color: colors.text,
     borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderColor: colors.border,
     borderRadius: 6,
     paddingHorizontal: 12,
     paddingVertical: 10,
-    backgroundColor: '#fafaf8',
+    backgroundColor: colors.inputBg,
   },
   filterRow: {
     flexDirection: 'row',
@@ -168,35 +171,35 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 4,
     borderWidth: 1,
-    borderColor: '#d0d0d0',
+    borderColor: colors.border,
   },
   pillActive: {
-    backgroundColor: '#1a1a1a',
-    borderColor: '#1a1a1a',
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
   },
   pillText: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#555',
+    color: colors.textSubtle,
   },
   pillTextActive: {
-    color: '#fafaf8',
+    color: colors.primaryText,
   },
   pillSmall: {
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 4,
     borderWidth: 1,
-    borderColor: '#d0d0d0',
+    borderColor: colors.border,
   },
   pillSmallText: {
     fontSize: 12,
     fontWeight: '500',
-    color: '#555555',
+    color: colors.textSubtle,
   },
   divider: {
     height: 1,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: colors.borderLight,
   },
   center: {
     flex: 1,
@@ -207,11 +210,11 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 12,
     fontSize: 13,
-    color: '#aaa',
+    color: colors.textVeryMuted,
   },
   emptyText: {
     fontSize: 14,
-    color: '#bbb',
+    color: colors.placeholder,
   },
   listContent: {
     paddingBottom: 40,

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { View, Text, StyleSheet, FlatList, TextInput, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
 import { useLocalSearchParams, useRouter, useNavigation } from 'expo-router';
 import { useHeaderHeight } from '@react-navigation/elements';
@@ -7,13 +7,16 @@ import { firestore } from '../../../services/firebase';
 import { useAuth } from '../../../context/AuthContext';
 import { sendMessage } from '../../../services/chatService';
 import { useProfile } from '../../../context/UserContext';
+import { useTheme } from '../../../context/ThemeContext';
 
 export default function ChatScreen() {
   const { chatId, facultyId, studentId, displayName } = useLocalSearchParams();
   const { user, role } = useAuth();
   const { profile } = useProfile();
+  const { colors } = useTheme();
   const navigation = useNavigation();
   const headerHeight = useHeaderHeight();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState('');
@@ -137,17 +140,17 @@ export default function ChatScreen() {
           editable={facultyAllowed}
         />
         <TouchableOpacity style={[styles.sendBtn, !facultyAllowed && styles.sendBtnDisabled]} onPress={handleSend} disabled={!inputText.trim() || sending || !facultyAllowed}>
-          {sending ? <ActivityIndicator size="small" color="#fff" /> : <Text style={styles.sendText}>Send</Text>}
+          {sending ? <ActivityIndicator size="small" color={colors.primaryText} /> : <Text style={styles.sendText}>Send</Text>}
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fafaf8',
+    backgroundColor: colors.background,
   },
   centerContainer: {
     flex: 1,
@@ -155,12 +158,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   disabledBanner: {
-    backgroundColor: '#f0f0f0',
+    backgroundColor: colors.fill,
     padding: 12,
     alignItems: 'center',
   },
   disabledBannerText: {
-    color: '#888888',
+    color: colors.textMuted,
     fontSize: 13,
     fontWeight: '600',
   },
@@ -186,46 +189,46 @@ const styles = StyleSheet.create({
     borderRadius: 16,
   },
   bubbleLeft: {
-    backgroundColor: '#f0f0f0',
+    backgroundColor: colors.fill,
     borderBottomLeftRadius: 4,
   },
   bubbleRight: {
-    backgroundColor: '#1a1a1a',
+    backgroundColor: colors.primary,
     borderBottomRightRadius: 4,
   },
   messageText: {
     fontSize: 15,
-    color: '#1a1a1a',
+    color: colors.text,
   },
   messageTextRight: {
-    color: '#fafaf8',
+    color: colors.primaryText,
   },
   systemBubble: {
     alignSelf: 'center',
-    backgroundColor: '#fafaf8',
+    backgroundColor: colors.surface,
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: '#e5e5e5',
+    borderColor: colors.border,
   },
   systemText: {
     fontSize: 12,
-    color: '#888',
+    color: colors.textMuted,
     fontWeight: '600',
   },
   inputContainer: {
     flexDirection: 'row',
     padding: 12,
-    backgroundColor: '#fafaf8',
+    backgroundColor: colors.surface,
     borderTopWidth: 1,
-    borderTopColor: '#E0E0E0',
+    borderTopColor: colors.border,
     alignItems: 'flex-end',
   },
   input: {
     flex: 1,
-    backgroundColor: '#fafaf8',
+    backgroundColor: colors.inputBg,
     borderRadius: 20,
     paddingHorizontal: 16,
     paddingTop: 12,
@@ -233,9 +236,10 @@ const styles = StyleSheet.create({
     maxHeight: 100,
     minHeight: 40,
     fontSize: 15,
+    color: colors.text,
   },
   sendBtn: {
-    backgroundColor: '#1a1a1a',
+    backgroundColor: colors.primary,
     width: 60,
     height: 40,
     borderRadius: 6,
@@ -245,11 +249,11 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   sendBtnDisabled: {
-    backgroundColor: '#e5e5e5',
+    backgroundColor: colors.fill,
   },
   sendText: {
-    color: '#fafaf8',
+    color: colors.primaryText,
     fontWeight: 'bold',
     fontSize: 14,
-  }
+  },
 });

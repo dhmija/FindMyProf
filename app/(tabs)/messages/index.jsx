@@ -1,11 +1,14 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { collection, query, where, onSnapshot, orderBy } from 'firebase/firestore';
 import { firestore } from '../../../services/firebase';
 import { useAuth } from '../../../context/AuthContext';
+import { useTheme } from '../../../context/ThemeContext';
 import { useRouter } from 'expo-router';
 
 const ChatThread = React.memo(({ item, role, onPress }) => {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const displayName = role === 'faculty' ? item.studentName : item.facultyName;
   const timeStr = item.lastMessageTimestamp 
     ? new Date(item.lastMessageTimestamp.toDate()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
@@ -24,10 +27,11 @@ const ChatThread = React.memo(({ item, role, onPress }) => {
 
 export default function MessagesIndex() {
   const { user, role } = useAuth();
+  const { colors } = useTheme();
   const router = useRouter();
-  
   const [threads, setThreads] = useState([]);
   const [loading, setLoading] = useState(true);
+  const styles = useMemo(() => makeStyles(colors), [colors]);
 
   useEffect(() => {
     if (!user?.uid) return;
@@ -84,7 +88,7 @@ export default function MessagesIndex() {
   if (loading) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#1a1a1a" />
+        <ActivityIndicator size="large" color={colors.text} />
       </View>
     );
   }
@@ -108,10 +112,10 @@ export default function MessagesIndex() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fafaf8',
+    backgroundColor: colors.background,
   },
   centerContainer: {
     flex: 1,
@@ -123,13 +127,13 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   threadCard: {
-    backgroundColor: '#fafaf8',
+    backgroundColor: colors.surface,
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
-    shadowColor: '#1a1a1a',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
+    shadowOpacity: 0.06,
     shadowRadius: 2,
     elevation: 2,
   },
@@ -141,18 +145,18 @@ const styles = StyleSheet.create({
   threadName: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#1a1a1a',
+    color: colors.text,
   },
   threadTime: {
     fontSize: 12,
-    color: '#999',
+    color: colors.textMuted,
   },
   threadMessage: {
     fontSize: 14,
-    color: '#555555',
+    color: colors.textSubtle,
   },
   emptyText: {
-    color: '#999',
+    color: colors.textMuted,
     fontStyle: 'italic',
-  }
+  },
 });
