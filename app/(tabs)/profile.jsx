@@ -1,10 +1,10 @@
-import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Animated, ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, Switch } from 'react-native';
-import { useAuth } from '../../context/AuthContext';
-import { useProfile } from '../../context/UserContext';
-import { useTheme } from '../../context/ThemeContext';
 import { useRouter } from 'expo-router';
-import { collection, query, where, orderBy, onSnapshot } from 'firebase/firestore';
+import { collection, onSnapshot, orderBy, query, where } from 'firebase/firestore';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { ActivityIndicator, Animated, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../context/ThemeContext';
+import { useProfile } from '../../context/UserContext';
 import { firestore } from '../../services/firebase';
 
 const STATUSES = [
@@ -27,11 +27,11 @@ export default function ProfileTab() {
   const [statusText, setStatusText] = useState('');
   const [phone, setPhone] = useState('');
   const [phoneVisible, setPhoneVisible] = useState(false);
-  
+
   const [locBlock, setLocBlock] = useState('');
   const [locFloor, setLocFloor] = useState('');
   const [locCubicle, setLocCubicle] = useState('');
-  
+
   const [officeHours, setOfficeHours] = useState([]);
   const [newOhDay, setNewOhDay] = useState('');
   const [newOhFrom, setNewOhFrom] = useState('');
@@ -231,11 +231,11 @@ export default function ProfileTab() {
         <View style={styles.guestCard}>
           <Text style={styles.appLogo}>FindMyProf</Text>
           <Text style={styles.guestMessage}>Sign in to access your profile.</Text>
-          
+
           <TouchableOpacity style={styles.primaryBtn} onPress={() => router.push('/auth/login')}>
             <Text style={styles.primaryBtnText}>Login</Text>
           </TouchableOpacity>
-          
+
           <TouchableOpacity style={styles.outlineBtn} onPress={() => router.push('/auth/student-signup')}>
             <Text style={styles.outlineBtnText}>Sign Up</Text>
           </TouchableOpacity>
@@ -269,7 +269,7 @@ export default function ProfileTab() {
   if (role === 'student') {
     const statusConfig = {
       confirmed: { bg: '#1a1a1a', text: '#fafaf8', border: '#1a1a1a' },
-      pending:   { bg: '#fafaf8', text: '#888888', border: '#d0d0d0' },
+      pending: { bg: '#fafaf8', text: '#888888', border: '#d0d0d0' },
       cancelled: { bg: '#f0f0f0', text: '#555555', border: '#f0f0f0' },
     };
 
@@ -346,7 +346,7 @@ export default function ProfileTab() {
               {editingField === 'semester' ? (
                 <>
                   <View style={styles.semesterGrid}>
-                    {[1,2,3,4,5,6,7,8].map(s => (
+                    {[1, 2, 3, 4, 5, 6, 7, 8].map(s => (
                       <TouchableOpacity
                         key={s}
                         style={[styles.semPill, editSemester === String(s) && styles.semPillActive]}
@@ -437,7 +437,7 @@ export default function ProfileTab() {
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        
+
         <View style={styles.header}>
           <Text style={styles.greeting}>Faculty Dashboard</Text>
           <Text style={styles.name}>{profile.name}</Text>
@@ -448,9 +448,10 @@ export default function ProfileTab() {
         <View style={styles.card}>
           <Text style={styles.cardTitle}>PHONE NUMBER</Text>
           <View style={styles.inputRow}>
-            <TextInput 
-              style={[styles.inputField, {flex: 1}]}
+            <TextInput
+              style={[styles.inputField, { flex: 1 }]}
               placeholder="e.g. 555-0199"
+              placeholderTextColor={colors.placeholder}
               keyboardType="number-pad"
               value={phone}
               onChangeText={setPhone}
@@ -463,11 +464,11 @@ export default function ProfileTab() {
           </View>
           <View style={styles.toggleRow}>
             <Text style={styles.toggleLabel}>Show phone on profile</Text>
-            <Switch 
-              value={phoneVisible} 
+            <Switch
+              value={phoneVisible}
               onValueChange={setPhoneVisible}
-              trackColor={{ false: '#e5e5e5', true: '#1a1a1a' }}
-              thumbColor={'#fafaf8'}
+              trackColor={{ false: colors.fill, true: colors.primary }}
+              thumbColor={'#f5f5f5'}
             />
           </View>
         </View>
@@ -505,15 +506,16 @@ export default function ProfileTab() {
           )}
 
           <Text style={styles.cardSubtitle}>Cubicle/Room Number</Text>
-          <TextInput 
+          <TextInput
             style={styles.inputField}
             placeholder="e.g. C-45"
+            placeholderTextColor={colors.placeholder}
             value={locCubicle}
             onChangeText={setLocCubicle}
           />
 
           {(locBlock !== (profile.location?.block || '') || locFloor !== (profile.location?.floor || '') || locCubicle !== (profile.location?.cubicle || '')) && (
-            <TouchableOpacity style={[styles.primaryBtn, {marginTop: 12}]} onPress={handleLocationSave}>
+            <TouchableOpacity style={[styles.primaryBtn, { marginTop: 12 }]} onPress={handleLocationSave}>
               <Text style={styles.primaryBtnText}>Save Location</Text>
             </TouchableOpacity>
           )}
@@ -521,12 +523,12 @@ export default function ProfileTab() {
 
         <View style={styles.card}>
           <Text style={styles.cardTitle}>CURRENT STATUS</Text>
-          
+
           <View style={styles.statusGrid}>
             {STATUSES.map((statusItem) => {
               const isActive = profile.status === statusItem.id;
               return (
-                <TouchableOpacity 
+                <TouchableOpacity
                   key={statusItem.id}
                   style={[styles.statusBtn, isActive && styles.statusBtnActive]}
                   onPress={() => handleStatusUpdate(statusItem.id)}
@@ -545,35 +547,35 @@ export default function ProfileTab() {
           <Text style={styles.cardTitle}>OFFICE HOURS</Text>
           {officeHours.map((oh, idx) => (
             <View key={idx} style={styles.ohCard}>
-               <View>
-                 <Text style={styles.ohDay}>{oh.day}</Text>
-                 <Text style={styles.ohTime}>{oh.from} - {oh.to}</Text>
-               </View>
-               <TouchableOpacity onPress={() => handleDeleteOfficeHour(idx)}>
-                  <Text style={styles.delText}>Delete</Text>
-               </TouchableOpacity>
+              <View>
+                <Text style={styles.ohDay}>{oh.day}</Text>
+                <Text style={styles.ohTime}>{oh.from} - {oh.to}</Text>
+              </View>
+              <TouchableOpacity onPress={() => handleDeleteOfficeHour(idx)}>
+                <Text style={styles.delText}>Delete</Text>
+              </TouchableOpacity>
             </View>
           ))}
           <View style={styles.ohInputRow}>
-            <TextInput style={[styles.inputField, {flex: 2, marginRight: 8}]} placeholder="Day (e.g. Mon)" value={newOhDay} onChangeText={setNewOhDay} />
-            <TextInput style={[styles.inputField, {flex: 1.5, marginRight: 8}]} placeholder="From" value={newOhFrom} onChangeText={setNewOhFrom} />
-            <TextInput style={[styles.inputField, {flex: 1.5}]} placeholder="To" value={newOhTo} onChangeText={setNewOhTo} />
+            <TextInput style={[styles.inputField, { flex: 2, marginRight: 8 }]} placeholder="Day" placeholderTextColor={colors.placeholder} value={newOhDay} onChangeText={setNewOhDay} />
+            <TextInput style={[styles.inputField, { flex: 1.5, marginRight: 8 }]} placeholder="From" placeholderTextColor={colors.placeholder} value={newOhFrom} onChangeText={setNewOhFrom} />
+            <TextInput style={[styles.inputField, { flex: 1.5 }]} placeholder="To" placeholderTextColor={colors.placeholder} value={newOhTo} onChangeText={setNewOhTo} />
           </View>
-          <TouchableOpacity style={[styles.outlineBtn, {marginTop: 12}]} onPress={handleAddOfficeHour}>
-             <Text style={styles.outlineBtnText}>+ Add Slot</Text>
+          <TouchableOpacity style={[styles.outlineBtn, { marginTop: 12 }]} onPress={handleAddOfficeHour}>
+            <Text style={styles.outlineBtnText}>+ Add Slot</Text>
           </TouchableOpacity>
         </View>
 
         <View style={styles.card}>
           <Text style={styles.cardTitle}>MESSAGE SETTINGS</Text>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-            <Text style={{ fontSize: 14, fontWeight: '600', color: '#1a1a1a' }}>Accept Direct Messages</Text>
-            <Switch 
-              value={profile.acceptsMessages} 
+            <Text style={{ fontSize: 14, fontWeight: '600', color: colors.text }}>Accept Direct Messages</Text>
+            <Switch
+              value={profile.acceptsMessages}
               onValueChange={handleToggleMessages}
               disabled={isUpdatingMessages}
-              trackColor={{ false: '#e5e5e5', true: '#1a1a1a' }}
-              thumbColor={'#fafaf8'}
+              trackColor={{ false: colors.fill, true: colors.primary }}
+              thumbColor={'#f5f5f5'}
             />
           </View>
           <Text style={styles.cardSubtitle}>
@@ -582,12 +584,12 @@ export default function ProfileTab() {
         </View>
 
         <Animated.Text style={[styles.floatingSuccess, { opacity: confirmAnim }]}>
-           Saved successfully
+          Saved successfully
         </Animated.Text>
 
         <View style={styles.card}>
-          <TouchableOpacity style={[styles.primaryBtn, {marginTop: 10}]} onPress={handleLogout}>
-              <Text style={styles.primaryBtnText}>Logout</Text>
+          <TouchableOpacity style={[styles.primaryBtn, { marginTop: 10 }]} onPress={handleLogout}>
+            <Text style={styles.primaryBtnText}>Logout</Text>
           </TouchableOpacity>
         </View>
 

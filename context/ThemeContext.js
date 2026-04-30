@@ -38,7 +38,7 @@ export const darkColors = {
   tabBar:          '#161616',
   inputBg:         '#1c1c1c',
   cardBorder:      '#252525',
-  placeholder:     '#555555',
+  placeholder:     '#666666',
   overlay:         'rgba(0,0,0,0.75)',
   shadow:          '#000000',
 };

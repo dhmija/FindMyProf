@@ -117,7 +117,7 @@ export default function ChatScreen() {
 
       {loading ? (
         <View style={styles.centerContainer}>
-          <ActivityIndicator size="small" color="#111" />
+          <ActivityIndicator size="small" color={colors.text} />
         </View>
       ) : (
         <FlatList
@@ -134,6 +134,7 @@ export default function ChatScreen() {
         <TextInput
           style={styles.input}
           placeholder="Type a message..."
+          placeholderTextColor={colors.placeholder}
           value={inputText}
           onChangeText={setInputText}
           multiline

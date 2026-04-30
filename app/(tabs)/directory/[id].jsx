@@ -147,7 +147,7 @@ export default function DirectoryDetail() {
   if (loading) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#1a1a1a" />
+        <ActivityIndicator size="large" color={colors.text} />
         <Text style={styles.mutedText}>Locating faculty profile...</Text>
       </View>
     );
@@ -180,7 +180,7 @@ export default function DirectoryDetail() {
         {!faculty.isRegistered ? (
           <View style={{ marginBottom: 16 }}>
             <View style={styles.unregisteredBanner}>
-               <Text style={styles.unregisteredText}>Faculty hasn't joined FindMyProf yet</Text>
+             <Text style={styles.unregisteredText}>Faculty hasn't joined FindMyProf yet</Text>
             </View>
             <TouchableOpacity style={styles.primaryButton} onPress={handleEmail}>
                <Text style={styles.primaryButtonText}>Send an Email</Text>
@@ -193,7 +193,7 @@ export default function DirectoryDetail() {
                 style={[styles.actionButton, styles.msgButton]} 
                 onPress={() => handleAuthGate("Login required to send a direct message.", navigateToChat)}
               >
-                <Text style={[styles.actionButtonText, { color: '#fafaf8' }]}>Send Message</Text>
+                <Text style={[styles.actionButtonText, { color: colors.primaryText }]}>Send Message</Text>
               </TouchableOpacity>
             )}
             <TouchableOpacity 
@@ -201,7 +201,7 @@ export default function DirectoryDetail() {
               onPress={() => handleAuthGate("Login required to notify the faculty that you're heading over.", handleQuickNotify)}
               disabled={notifyLoading}
             >
-              {notifyLoading ? <ActivityIndicator color="#1a1a1a" size="small"/> : <Text style={[styles.actionButtonText, { color: '#1a1a1a' }]}>I'm heading to your office</Text>}
+              {notifyLoading ? <ActivityIndicator color={colors.text} size="small"/> : <Text style={[styles.actionButtonText, { color: colors.text }]}>I'm heading to your office</Text>}
             </TouchableOpacity>
           </View>
         )}
@@ -350,6 +350,10 @@ const makeStyles = (colors) => StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.borderLight,
     marginBottom: 12,
+  },
+  unregisteredText: {
+    fontSize: 14,
+    color: colors.textSubtle,
   },
   infoRow: {
     flexDirection: 'row',
